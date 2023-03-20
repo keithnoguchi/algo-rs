@@ -17,11 +17,17 @@ impl<T: PartialOrd> Heap<T> {
         }
     }
 
-    fn insert(&mut self, value: T) {
-        let mut index = self.data.len();
+    /// Inserts the new value to the heap.
+    pub fn insert(&mut self, value: T) {
+        let index = self.data.len();
         self.data.push(value);
+        self.bubble_up(index);
+    }
+
+    fn bubble_up(&mut self, mut index: usize) {
+        debug_assert!(index < self.data.len());
         while let Some(parent) = self.parent(index) {
-            if self.data[parent] >= self.data[index] {
+            if self.data[parent] > self.data[index] {
                 break;
             }
             self.data.swap(parent, index);
