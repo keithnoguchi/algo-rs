@@ -2,6 +2,8 @@
 
 #![forbid(missing_debug_implementations)]
 
+use std::ops::Range;
+
 /// A N-arity max-heap.
 #[derive(Debug)]
 pub struct Heap<T: PartialOrd> {
@@ -26,7 +28,7 @@ impl<T: PartialOrd> Heap<T> {
 
     fn bubble_up(&mut self, mut index: usize) {
         debug_assert!(index < self.data.len());
-        while let Some(parent) = self.parent(index) {
+        while let Some(parent) = self.parent_index(index) {
             if self.data[parent] > self.data[index] {
                 break;
             }
@@ -35,11 +37,45 @@ impl<T: PartialOrd> Heap<T> {
         }
     }
 
-    fn parent(&self, index: usize) -> Option<usize> {
-        match index {
-            0 => None,
-            _ => Some((index - 1) / self.arity),
+    fn push_down(&mut self, mut index: usize) {
+        while let Some(children) = self.children_indices(index) {
+            let max = self.max_index(children);
+            if self.data[index] > self.data[max] {
+                break;
+            }
+            self.data.swap(index, max);
+            index = max;
         }
+    }
+
+    fn parent_index(&self, child: usize) -> Option<usize> {
+        match child {
+            0 => None,
+            _ => Some((child - 1) / self.arity),
+        }
+    }
+
+    fn children_indices(&self, parent: usize) -> Option<Range<usize>> {
+        if parent == self.data.len() - 1 {
+            return None;
+        }
+        let start = (parent + 1) * self.arity;
+        let end = if start + self.arity > self.data.len() {
+            self.data.len()
+        } else {
+            start + self.arity
+        };
+        Some(start..end)
+    }
+
+    fn max_index(&self, children: Range<usize>) -> usize {
+        let start = children.start;
+        self.data[children]
+            .iter()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| (*a).partial_cmp(*b).unwrap())
+            .map(|(index, _)| start + index)
+            .unwrap()
     }
 }
 
