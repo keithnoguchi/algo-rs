@@ -10,7 +10,7 @@ pub fn quick_sort<T: Debug + PartialOrd>(v: &mut [T]) {
     if v.len() <= 1 {
         return;
     }
-    let mut pivot = v.len() / 2;
+    let mut pivot = rand::rand(v.len());
     v.swap(0, pivot);
     pivot = 0;
     for i in 1..v.len() {
