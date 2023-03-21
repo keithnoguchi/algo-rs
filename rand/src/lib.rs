@@ -9,7 +9,7 @@ pub fn rand(max: usize) -> usize {
 }
 
 #[derive(Debug)]
-pub struct RandGen {
+struct RandGen {
     curr: usize,
     mul: usize,
     inc: usize,
@@ -17,7 +17,7 @@ pub struct RandGen {
 }
 
 impl RandGen {
-    pub const fn new(curr: usize) -> Self {
+    const fn new(curr: usize) -> Self {
         Self {
             curr,
             mul: 56394237,
@@ -26,7 +26,7 @@ impl RandGen {
         }
     }
 
-    pub fn next(&mut self, max: usize) -> usize {
+    fn next(&mut self, max: usize) -> usize {
         self.curr = (self.curr * self.mul + self.inc) % self.modulo;
         self.curr % max
     }
