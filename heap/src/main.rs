@@ -6,12 +6,12 @@ use std::ops::Range;
 
 /// A N-arity max-heap.
 #[derive(Debug)]
-pub struct Heap<T: PartialOrd> {
+pub struct Heap<T: PartialOrd + PartialEq + Eq> {
     data: Vec<T>,
     arity: usize,
 }
 
-impl<T: PartialOrd> Heap<T> {
+impl<T: PartialOrd + PartialEq + Eq> Heap<T> {
     pub fn new(arity: usize) -> Self {
         Self {
             data: Vec::new(),
@@ -37,6 +37,32 @@ impl<T: PartialOrd> Heap<T> {
             self.push_down(0);
             item
         }
+    }
+
+    /// Update the first find `value` to the `new` value.
+    ///
+    /// It returns `false` in case there is no matched value.
+    pub fn update(&mut self, old: T, new: T) -> bool {
+        let ordering = match new.partial_cmp(&old).unwrap() {
+            std::cmp::Ordering::Equal => return false,
+            ordering => ordering,
+        };
+        let index = match self
+            .data
+            .iter()
+            .enumerate()
+            .find(|(_, v)| (*v).eq(&old))
+            .map(|(i, _)| i)
+        {
+            None => return false,
+            Some(index) => index,
+        };
+        self.data[index] = new;
+        match ordering {
+            std::cmp::Ordering::Greater => self.bubble_up(index),
+            _ => self.push_down(index),
+        }
+        true
     }
 
     fn bubble_up(&mut self, mut index: usize) {
@@ -70,7 +96,7 @@ impl<T: PartialOrd> Heap<T> {
 
     fn children_indices(&self, parent: usize) -> Option<Range<usize>> {
         let start = parent * self.arity + 1;
-        if start >= self.data.len() - 1 {
+        if start >= self.data.len() {
             return None;
         }
         let end = if start + self.arity < self.data.len() {
@@ -92,6 +118,9 @@ impl<T: PartialOrd> Heap<T> {
     }
 }
 
+#[cfg(test)]
+mod test;
+
 fn main() {
     let mut heap = Heap::new(2);
     heap.insert(10);
@@ -100,10 +129,9 @@ fn main() {
     heap.insert(20);
     heap.insert(39);
     heap.insert(15);
-
     println!("{heap:?}");
-    while let Some(top) = heap.top() {
-        println!("{top}");
+    while let Some(value) = heap.top() {
+        println!("{value}");
     }
 
     let mut heap = Heap::new(3);
@@ -113,8 +141,9 @@ fn main() {
     heap.insert(20);
     heap.insert(39);
     heap.insert(15);
+    heap.update(10, 55);
     println!("{heap:?}");
-    while let Some(top) = heap.top() {
-        println!("{top}");
+    while let Some(value) = heap.top() {
+        println!("{value}");
     }
 }
