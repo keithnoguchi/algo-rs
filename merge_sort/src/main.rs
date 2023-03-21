@@ -38,7 +38,7 @@ pub fn merge_sort<T: Debug + PartialOrd>(mut v: Vec<T>) -> Vec<T> {
                     result.extend(a_it);
                     return result;
                 }
-            }
+            },
             None => {
                 if let Some(val) = b_peek {
                     result.push(val);
@@ -49,6 +49,9 @@ pub fn merge_sort<T: Debug + PartialOrd>(mut v: Vec<T>) -> Vec<T> {
         }
     }
 }
+
+#[cfg(test)]
+mod test;
 
 fn main() {
     let v = vec![9, 8, 10, 22, 1, -1];
