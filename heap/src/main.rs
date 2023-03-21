@@ -26,6 +26,19 @@ impl<T: PartialOrd> Heap<T> {
         self.bubble_up(index);
     }
 
+    /// Pop the highest priority item from the heap.
+    pub fn top(&mut self) -> Option<T> {
+        if self.data.len() <= 1 {
+            self.data.pop()
+        } else {
+            let tail = self.data.len() - 1;
+            self.data.swap(0, tail);
+            let item = self.data.pop();
+            self.push_down(0);
+            item
+        }
+    }
+
     fn bubble_up(&mut self, mut index: usize) {
         debug_assert!(index < self.data.len());
         while let Some(parent) = self.parent_index(index) {
@@ -56,14 +69,14 @@ impl<T: PartialOrd> Heap<T> {
     }
 
     fn children_indices(&self, parent: usize) -> Option<Range<usize>> {
-        if parent == self.data.len() - 1 {
+        let start = parent * self.arity + 1;
+        if start >= self.data.len() - 1 {
             return None;
         }
-        let start = (parent + 1) * self.arity;
-        let end = if start + self.arity > self.data.len() {
-            self.data.len()
-        } else {
+        let end = if start + self.arity < self.data.len() {
             start + self.arity
+        } else {
+            self.data.len()
         };
         Some(start..end)
     }
@@ -89,6 +102,9 @@ fn main() {
     heap.insert(15);
 
     println!("{heap:?}");
+    while let Some(top) = heap.top() {
+        println!("{top}");
+    }
 
     let mut heap = Heap::new(3);
     heap.insert(10);
@@ -97,6 +113,8 @@ fn main() {
     heap.insert(20);
     heap.insert(39);
     heap.insert(15);
-
     println!("{heap:?}");
+    while let Some(top) = heap.top() {
+        println!("{top}");
+    }
 }
