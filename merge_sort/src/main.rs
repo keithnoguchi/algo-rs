@@ -4,6 +4,7 @@ use std::fmt::Debug;
 
 /// O(n * ln(n))
 pub fn merge_sort<T: Debug + PartialOrd>(mut v: Vec<T>) -> Vec<T> {
+    println!("merge_sort: {v:?}");
     if v.len() <= 1 {
         return v;
     }
@@ -16,7 +17,7 @@ pub fn merge_sort<T: Debug + PartialOrd>(mut v: Vec<T>) -> Vec<T> {
     // sort the right half.
     let b = merge_sort(right);
 
-    // bring the sorted halfs together.
+    // bring the sorted halves together.
     let mut a_it = a.into_iter();
     let mut b_it = b.into_iter();
     let mut a_peek = a_it.next();
@@ -36,6 +37,7 @@ pub fn merge_sort<T: Debug + PartialOrd>(mut v: Vec<T>) -> Vec<T> {
                 None => {
                     result.push(a_peek.take().unwrap());
                     result.extend(a_it);
+                    println!("merge_sort: {result:?}");
                     return result;
                 }
             },
@@ -44,6 +46,7 @@ pub fn merge_sort<T: Debug + PartialOrd>(mut v: Vec<T>) -> Vec<T> {
                     result.push(val);
                 }
                 result.extend(b_it);
+                println!("merge_sort: {result:?}");
                 return result;
             }
         }
