@@ -4,4 +4,5 @@ members = [
     "gcd",
     "heap",
     "bubble_sort",
+    "merge_sort",
 ]
