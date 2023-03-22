@@ -31,10 +31,16 @@ impl<T: Debug> Tree<T> {
         }
     }
 
+    pub fn set_height(&mut self) {
+        if let Some(ref mut node) = self.0 {
+            node.height = 1 + std::cmp::max(node.left.height(), node.right.height());
+        }
+    }
+
     fn print_depth_first(&self, f: &mut fmt::Formatter<'_>, depth: usize) -> fmt::Result {
         if let Some(ref node) = self.0 {
             node.left.print_depth_first(f, depth + 1)?;
-            writeln!(f, "{:.<depth$}{:?}", "", node.data)?;
+            writeln!(f, "{}:{:.<depth$}{:?}", node.height, "", node.data)?;
             node.right.print_depth_first(f, depth + 1)?;
         }
         Ok(())
@@ -53,6 +59,7 @@ impl<T: Debug + PartialOrd> Tree<T> {
                 }
             }
         }
+        self.set_height();
     }
 }
 
@@ -77,13 +84,13 @@ impl<T: Debug> From<T> for Node<T> {
 
 fn main() {
     let mut tree = Tree::new();
-    tree.insert(100);
+    tree.insert(4);
+    tree.insert(5);
+    tree.insert(6);
+    tree.insert(10);
     tree.insert(1);
-    tree.insert(100);
-    tree.insert(99);
-    tree.insert(100);
-    tree.insert(9);
-    tree.insert(44);
-    tree.insert(59);
+    tree.insert(94);
+    tree.insert(54);
+    tree.insert(3);
     print!("{tree}");
 }
