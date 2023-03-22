@@ -22,8 +22,8 @@ pub fn quick_sort<T: Debug + PartialOrd + Send>(v: &mut [T]) {
         }
     }
     v.swap(0, pivot);
+    let (a, b) = v.split_at_mut(pivot);
     thread::scope(|s| {
-        let (a, b) = v.split_at_mut(pivot);
         s.spawn(move || {
             quick_sort(&mut a[..]);
         });
