@@ -2,7 +2,7 @@
 
 #![forbid(missing_debug_implementations)]
 
-use std::fmt::Debug;
+use std::fmt::{self, Debug, Display};
 
 #[derive(Debug)]
 pub struct Tree<T: Debug>(Option<Box<Node<T>>>);
@@ -13,9 +13,24 @@ impl<T: Debug> Default for Tree<T> {
     }
 }
 
+impl<T: Debug> Display for Tree<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.print_depth_first(f, 0)
+    }
+}
+
 impl<T: Debug> Tree<T> {
     pub const fn new() -> Self {
         Self(None)
+    }
+
+    fn print_depth_first(&self, f: &mut fmt::Formatter<'_>, depth: usize) -> fmt::Result {
+        if let Some(ref node) = self.0 {
+            node.left.print_depth_first(f, depth + 1)?;
+            writeln!(f, "{:.<depth$}{:?}", "", node.data)?;
+            node.right.print_depth_first(f, depth + 1)?;
+        }
+        Ok(())
     }
 }
 
@@ -61,6 +76,5 @@ fn main() {
     tree.insert(9);
     tree.insert(44);
     tree.insert(59);
-
-    println!("{tree:?}");
+    print!("{tree}");
 }
