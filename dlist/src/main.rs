@@ -45,6 +45,27 @@ impl<T: Debug> LinkedList<T> {
             }
         }
     }
+
+    pub fn push_back(&mut self, data: T) {
+        match self.tail.take() {
+            Some(tail) => {
+                let node = Rc::new(RefCell::new(Node {
+                    data,
+                    next: None,
+                    prev: Some(tail.clone()),
+                }));
+                let tail = tail.upgrade().unwrap();
+                let mut tail = tail.borrow_mut();
+                self.tail = Some(Rc::downgrade(&node));
+                tail.next = Some(node);
+            }
+            None => {
+                let node = Rc::new(RefCell::new(Node::new(data)));
+                self.tail = Some(Rc::downgrade(&node));
+                self.head = Some(node);
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -69,5 +90,7 @@ fn main() {
     list.push_front(3);
     list.push_front(2);
     list.push_front(1);
+    list.push_back(4);
+    list.push_back(5);
     println!("{list:?}");
 }
