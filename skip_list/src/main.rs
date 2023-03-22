@@ -17,6 +17,7 @@ impl<T: Debug> Display for SkipList<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for row in &self.0 {
             row.print_row(f)?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -31,8 +32,8 @@ impl<T: Debug + PartialOrd> SkipList<T> {
         // push the data in the highest available row.
         for i in (0..self.0.len()).rev() {
             if data > *self.0[i].data.borrow() {
-                if let Some(_child) = self.0[i].insert(data) {
-                    //todo!();
+                if let Some(child) = self.0[i].insert(data) {
+                    self.loop_up(child, i + 1);
                 }
                 return;
             }
@@ -41,7 +42,26 @@ impl<T: Debug + PartialOrd> SkipList<T> {
         let mut node = Node::from(data);
         std::mem::swap(&mut node, &mut self.0[0]);
         let node = Rc::new(RefCell::new(node));
-        self.0[0].next = Some(node);
+        self.0[0].next = Some(node.clone());
+        self.loop_up(node, 1);
+    }
+
+    fn loop_up(&mut self, child: Rc<RefCell<Node<T>>>, n: usize) {
+        if rand::rand(2) == 1 {
+            return;
+        }
+        let data = child.borrow().data.clone();
+        let mut node = Node {
+            data,
+            next: None,
+            down: Some(child),
+        };
+        if n >= self.0.len() {
+            self.0.push(node);
+            return;
+        }
+        std::mem::swap(&mut node, &mut self.0[n]);
+        self.0[n].next = Some(Rc::new(RefCell::new(node)));
     }
 }
 
@@ -127,5 +147,5 @@ fn main() {
     list.insert(77);
     list.insert(84);
     list.insert(1);
-    println!("{list}");
+    print!("{list}");
 }
