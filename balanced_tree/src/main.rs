@@ -145,4 +145,9 @@ fn main() {
     tree.insert(54);
     tree.insert(3);
     println!("{tree}");
+
+    for i in 0..1_000 {
+        tree.insert(i);
+    }
+    println!("{tree}");
 }
