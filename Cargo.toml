@@ -12,4 +12,5 @@ members = [
     "dlist",
     "tree",
     "balanced_tree",
+    "skip_list",
 ]
