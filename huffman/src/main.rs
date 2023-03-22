@@ -13,7 +13,22 @@ pub struct HScore {
 #[derive(Debug)]
 pub enum HuffmanNode {
     Tree(Box<Self>, Box<Self>),
-    Lead(char),
+    Leaf(char),
+}
+
+impl HuffmanNode {
+    pub fn print_depth_first(&self, depth: usize, dir: char) {
+        match self {
+            Self::Tree(l, r) => {
+                l.print_depth_first(depth + 1, '/');
+                println!("{:.<depth$}{}*", "", dir);
+                r.print_depth_first(depth + 1, '\\');
+            }
+            Self::Leaf(c) => {
+                println!("{:.<depth$}{}{}", "", dir, c);
+            }
+        }
+    }
 }
 
 pub fn build_tree(s: &str) -> HuffmanNode {
@@ -26,7 +41,7 @@ pub fn build_tree(s: &str) -> HuffmanNode {
         .into_iter()
         .map(|(k, v)| {
             HScore {
-                h: HuffmanNode::Lead(k),
+                h: HuffmanNode::Leaf(k),
                 score: v,
             }
         })
@@ -56,7 +71,8 @@ pub fn build_tree(s: &str) -> HuffmanNode {
 }
 
 fn main() {
-    let tree = build_tree("Hello, world!");
-    println!("{tree:#?}");
-
+    let s = "at an apple app";
+    println!("{s}");
+    let tree = build_tree(s);
+    tree.print_depth_first(0, '<');
 }
