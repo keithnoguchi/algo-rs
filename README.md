@@ -8,6 +8,6 @@
 
 ## Data structures
 
-- [A linked list](list/src/main.rs)
+- [A singly linked list](list/src/main.rs)
 
 Happy Hacking!
