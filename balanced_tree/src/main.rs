@@ -19,6 +19,22 @@ impl<T: Debug> Display for Tree<T> {
     }
 }
 
+impl<T: Debug + PartialOrd> Tree<T> {
+    pub fn insert(&mut self, data: T) {
+        match self.0 {
+            None => self.0 = Some(Box::new(Node::from(data))),
+            Some(ref mut node) => {
+                if data < node.data {
+                    node.left.insert(data);
+                } else if data > node.data {
+                    node.right.insert(data);
+                }
+            }
+        }
+        self.set_height();
+    }
+}
+
 impl<T: Debug> Tree<T> {
     pub const fn new() -> Self {
         Self(None)
@@ -32,8 +48,8 @@ impl<T: Debug> Tree<T> {
     }
 
     pub fn set_height(&mut self) {
-        if let Some(ref mut node) = self.0 {
-            node.height = 1 + std::cmp::max(node.left.height(), node.right.height());
+        if let Some(ref mut node) = self.0.as_mut() {
+            node.set_height();
         }
     }
 
@@ -48,22 +64,6 @@ impl<T: Debug> Tree<T> {
             node.right.print_depth_first(f, depth + 1)?;
         }
         Ok(())
-    }
-}
-
-impl<T: Debug + PartialOrd> Tree<T> {
-    pub fn insert(&mut self, data: T) {
-        match self.0 {
-            None => self.0 = Some(Box::new(Node::from(data))),
-            Some(ref mut node) => {
-                if data < node.data {
-                    node.left.insert(data);
-                } else if data > node.data {
-                    node.right.insert(data);
-                }
-            }
-        }
-        self.set_height();
     }
 }
 
@@ -97,8 +97,12 @@ impl<T: Debug> Node<T> {
         self.right.set_height();
         top.left = Tree(Some(Box::new(self)));
         top.left.set_height();
-        top.height = 1 + std::cmp::max(top.left.height(), top.right.height());
+        top.set_height();
         top
+    }
+
+    fn set_height(&mut self) {
+        self.height = 1 + std::cmp::max(self.left.height(), self.right.height());
     }
 }
 
@@ -112,5 +116,11 @@ fn main() {
     tree.insert(94);
     tree.insert(54);
     tree.insert(3);
-    print!("{tree}");
+    println!("{tree}");
+
+    tree.rotate_left();
+    println!("{tree}");
+
+    tree.rotate_left();
+    println!("{tree}");
 }
