@@ -11,4 +11,5 @@ members = [
     "list",
     "dlist",
     "tree",
+    "balanced_tree",
 ]
