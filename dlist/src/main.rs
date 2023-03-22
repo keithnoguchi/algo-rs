@@ -25,6 +25,26 @@ impl<T: Debug> LinkedList<T> {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn push_front(&mut self, data: T) {
+        match self.head.take() {
+            Some(head) => {
+                let node = Rc::new(RefCell::new(Node {
+                    data,
+                    next: Some(head.clone()),
+                    prev: None,
+                }));
+                let mut next = head.borrow_mut();
+                next.prev = Some(Rc::downgrade(&node));
+                self.head = Some(node);
+            }
+            None => {
+                let node = Rc::new(RefCell::new(Node::new(data)));
+                self.tail = Some(Rc::downgrade(&node));
+                self.head = Some(node);
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -45,7 +65,9 @@ impl<T: Debug> Node<T> {
 }
 
 fn main() {
-    let mut list = LinkedList::<&str>::new();
-
+    let mut list = LinkedList::new();
+    list.push_front(3);
+    list.push_front(2);
+    list.push_front(1);
     println!("{list:?}");
 }
