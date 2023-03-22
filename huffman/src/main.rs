@@ -17,6 +17,29 @@ pub enum HuffmanNode {
 }
 
 impl HuffmanNode {
+    pub fn encode_char(&self, c: char) -> Option<Vec<char>> {
+        match self {
+            Self::Tree(l, r) => {
+                if let Some(mut v) = l.encode_char(c) {
+                    v.insert(0, '0');
+                    return Some(v);
+                }
+                if let Some(mut v) = r.encode_char(c) {
+                    v.insert(0, '1');
+                    return Some(v);
+                }
+                None
+            }
+            Self::Leaf(leaf) => {
+                if c == *leaf {
+                    Some(Vec::new())
+                } else {
+                    None
+                }
+            }
+        }
+    }
+
     pub fn print_depth_first(&self, depth: usize, dir: char) {
         match self {
             Self::Tree(l, r) => {
@@ -39,11 +62,9 @@ pub fn build_tree(s: &str) -> HuffmanNode {
     });
     let mut tlist: Vec<HScore> = map
         .into_iter()
-        .map(|(k, v)| {
-            HScore {
-                h: HuffmanNode::Leaf(k),
-                score: v,
-            }
+        .map(|(k, v)| HScore {
+            h: HuffmanNode::Leaf(k),
+            score: v,
         })
         .collect();
 
@@ -75,4 +96,13 @@ fn main() {
     println!("{s}");
     let tree = build_tree(s);
     tree.print_depth_first(0, '<');
+
+    println!("\nencoding");
+    let mut chars = std::collections::BTreeSet::new();
+    s.chars().for_each(|c| {
+        chars.insert(c);
+    });
+    for c in chars {
+        println!("{:?} = {:?}", c, tree.encode_char(c));
+    }
 }
