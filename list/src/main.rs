@@ -1,3 +1,5 @@
+//! A singly linked list
+
 use std::fmt::Debug;
 
 #[derive(Debug)]
