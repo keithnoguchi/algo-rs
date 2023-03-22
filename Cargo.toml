@@ -7,4 +7,5 @@ members = [
     "merge_sort",
     "quick_sort",
     "rand",
+    "fibonacci",
 ]
