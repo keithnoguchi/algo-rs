@@ -9,6 +9,7 @@ fn main() {
     list.push_front("1".to_string());
     list.push_back("4".to_string());
     list.push_back("5".to_string());
+    assert_eq!(list.len(), 5);
     for item in list.iter() {
         println!("{}", **item.borrow());
     }
