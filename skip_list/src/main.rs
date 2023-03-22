@@ -5,6 +5,48 @@ use std::fmt::Debug;
 use std::rc::Rc;
 
 #[derive(Debug)]
+pub struct SkipList<T: Debug>(Vec<Node<T>>);
+
+impl<T: Debug> Default for SkipList<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T: Debug + PartialOrd> SkipList<T> {
+    pub fn insert(&mut self, data: T) {
+        if self.is_empty() {
+            self.0.push(Node::from(data));
+            return;
+        }
+        // push the data in the highest available row.
+        for i in (0..self.0.len()).rev() {
+            if data > *self.0[i].data.borrow() {
+                if let Some(_child) = self.0[i].insert(data) {
+                    todo!();
+                }
+                return;
+            }
+        }
+        // Needs to be in the bottom of the list.
+        let mut node = Node::from(data);
+        std::mem::swap(&mut node, &mut self.0[0]);
+        let node = Rc::new(RefCell::new(node));
+        self.0[0].next = Some(node.clone());
+    }
+}
+
+impl<T: Debug> SkipList<T> {
+    pub const fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+#[derive(Debug)]
 struct Node<T: Debug> {
     data: Rc<RefCell<T>>,
     next: Option<Rc<RefCell<Self>>>,
