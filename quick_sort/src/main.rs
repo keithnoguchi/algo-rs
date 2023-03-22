@@ -12,6 +12,13 @@ pub fn quick_sort<T: Debug + PartialOrd + Send>(v: &mut [T]) {
     if v.len() <= 1 {
         return;
     }
+    let pivot = pivot(v);
+    let (a, b) = v.split_at_mut(pivot);
+    rayon::join(|| quick_sort(&mut a[..]), || quick_sort(&mut b[1..]));
+    println!("{id:?}: quick_sort: {v:?}");
+}
+
+fn pivot<T: PartialOrd + Send>(v: &mut [T]) -> usize {
     let mut pivot = rand::rand(v.len());
     v.swap(0, pivot);
     pivot = 0;
@@ -22,14 +29,7 @@ pub fn quick_sort<T: Debug + PartialOrd + Send>(v: &mut [T]) {
         }
     }
     v.swap(0, pivot);
-    let (a, b) = v.split_at_mut(pivot);
-    thread::scope(|s| {
-        s.spawn(move || {
-            quick_sort(&mut a[..]);
-        });
-        quick_sort(&mut b[1..]);
-    });
-    println!("{id:?}: quick_sort: {v:?}");
+    pivot
 }
 
 #[cfg(test)]
