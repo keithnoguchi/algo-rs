@@ -146,6 +146,7 @@ fn main() {
     list.insert(6);
     list.insert(77);
     list.insert(84);
+    list.insert(27);
     list.insert(1);
     print!("{list}");
 }
