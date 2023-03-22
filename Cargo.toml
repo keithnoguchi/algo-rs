@@ -10,4 +10,5 @@ members = [
     "fibonacci",
     "list",
     "dlist",
+    "tree",
 ]
