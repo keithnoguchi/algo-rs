@@ -21,17 +21,34 @@ impl<T: Debug> Display for Tree<T> {
 
 impl<T: Debug + PartialOrd> Tree<T> {
     pub fn insert(&mut self, data: T) {
-        match self.0 {
-            None => self.0 = Some(Box::new(Node::from(data))),
+        let rotation_direction = match self.0 {
+            None => {
+                self.0 = Some(Box::new(Node::from(data)));
+                0
+            }
             Some(ref mut node) => {
                 if data < node.data {
                     node.left.insert(data);
-                } else if data > node.data {
+                    if node.left.height() - node.right.height() > 1 {
+                        1
+                    } else {
+                        0
+                    }
+                } else {
                     node.right.insert(data);
+                    if node.right.height() - node.left.height() > 1 {
+                        -1
+                    } else {
+                        0
+                    }
                 }
             }
+        };
+        match rotation_direction {
+            1 => self.rotate_right(),
+            -1 => self.rotate_left(),
+            _ => self.set_height(),
         }
-        self.set_height();
     }
 }
 
