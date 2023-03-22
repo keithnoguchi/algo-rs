@@ -21,8 +21,49 @@ impl<T: Debug> From<T> for Node<T> {
     }
 }
 
-fn main() {
-    let node = Node::from(1);
+impl<T: Debug + PartialOrd> Node<T> {
+    pub fn insert(&mut self, data: T) -> Option<Rc<RefCell<Self>>> {
+        if let Some(ref mut next) = self.next {
+            if data > *next.borrow().data.borrow() {
+                return next.borrow_mut().insert(data);
+            }
+        }
 
+        if let Some(ref mut down) = self.down {
+            return match down.borrow_mut().insert(data) {
+                Some(child) => match rand::rand(2) {
+                    1 => {
+                        let data = child.borrow().data.clone();
+                        let node = Self {
+                            data,
+                            next: self.next.take(),
+                            down: Some(child),
+                        };
+                        let node = Rc::new(RefCell::new(node));
+                        self.next = Some(node.clone());
+                        Some(node)
+                    }
+                    _ => None,
+                },
+                None => None,
+            };
+        }
+
+        // We're at the bottom of the list.
+        let mut node = Node::from(data);
+        node.next = self.next.take();
+        let node = Rc::new(RefCell::new(node));
+        self.next = Some(node.clone());
+        Some(node)
+    }
+}
+
+fn main() {
+    let mut node = Node::from(1);
+    node.insert(4);
+    node.insert(6);
+    node.insert(77);
+    node.insert(84);
+    node.insert(1);
     println!("{node:?}");
 }
