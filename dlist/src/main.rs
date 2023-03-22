@@ -4,6 +4,7 @@
 
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::{Deref, DerefMut};
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
@@ -100,10 +101,24 @@ impl<T: Debug> LinkedList<T> {
 }
 
 #[derive(Debug)]
-pub struct Node<T: Debug> {
+struct Node<T: Debug> {
     data: T,
     next: Option<Rc<RefCell<Self>>>,
     prev: Option<Weak<RefCell<Self>>>,
+}
+
+impl<T: Debug> Deref for Node<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl<T: Debug> DerefMut for Node<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.data
+    }
 }
 
 impl<T: Debug> From<T> for Node<T> {
