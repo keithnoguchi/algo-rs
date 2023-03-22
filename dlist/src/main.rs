@@ -93,6 +93,10 @@ impl<T: Debug> LinkedList<T> {
             Rc::try_unwrap(node).ok().unwrap().into_inner().data
         })
     }
+
+    pub const fn is_empty(&self) -> bool {
+        self.head.is_none()
+    }
 }
 
 #[derive(Debug)]
