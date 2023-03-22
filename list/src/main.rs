@@ -1,15 +1,15 @@
 use std::fmt::Debug;
 
 #[derive(Debug)]
-pub struct LinkedList<T: Debug>(Option<(T, Box<Self>)>);
+pub struct LinkedList<T: Debug + PartialOrd>(Option<(T, Box<Self>)>);
 
-impl<T: Debug> Default for LinkedList<T> {
+impl<T: Debug + PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self(None)
     }
 }
 
-impl<T: Debug> LinkedList<T> {
+impl<T: Debug + PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -25,6 +25,19 @@ impl<T: Debug> LinkedList<T> {
             None => self.push_front(data),
         }
     }
+
+    pub fn insert(&mut self, data: T) {
+        match self.0 {
+            None => self.push_front(data),
+            Some((ref current, ref mut next)) => {
+                if data <= *current {
+                    self.push_front(data);
+                } else {
+                    next.insert(data);
+                }
+            }
+        }
+    }
 }
 
 fn main() {
@@ -35,5 +48,8 @@ fn main() {
     list.push_back(11);
     list.push_back(12);
     list.push_back(13);
+    list.insert(0);
+    list.insert(14);
+    list.insert(8);
     println!("{list:?}");
 }
