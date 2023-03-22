@@ -13,4 +13,5 @@ members = [
     "tree",
     "balanced_tree",
     "skip_list",
+    "huffman",
 ]
