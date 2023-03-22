@@ -99,6 +99,10 @@ impl<T: Debug> LinkedList<T> {
         self.head.is_none()
     }
 
+    pub fn len(&self) -> usize {
+        self.iter().count()
+    }
+
     pub fn iter(&self) -> ListIter<T> {
         ListIter {
             next: self.head.clone(),
