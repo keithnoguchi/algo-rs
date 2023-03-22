@@ -20,6 +20,16 @@ pub struct Node<T: Debug> {
     right: Tree<T>,
 }
 
+impl<T: Debug> From<T> for Node<T> {
+    fn from(data: T) -> Self {
+        Self {
+            data,
+            left: Tree::default(),
+            right: Tree::default(),
+        }
+    }
+}
+
 fn main() {
     let tree = Tree::<String>::default();
     println!("{tree:?}");
