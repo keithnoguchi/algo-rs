@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rand = { path = "../rand" }
+rayon = "1.7.0"
