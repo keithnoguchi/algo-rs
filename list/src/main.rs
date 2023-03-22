@@ -28,11 +28,12 @@ impl<T: Debug> LinkedList<T> {
 }
 
 fn main() {
-    let mut list = LinkedList::<&str>::new();
-    list.push_front("push front first");
-    list.push_front("push front second");
-    list.push_front("push front third");
-    list.push_back("push back first");
-    list.push_back("push back second");
+    let mut list = LinkedList::new();
+    list.push_front(1);
+    list.push_front(2);
+    list.push_front(3);
+    list.push_back(11);
+    list.push_back(12);
+    list.push_back(13);
     println!("{list:?}");
 }
