@@ -46,16 +46,6 @@ impl<T: Debug> LinkedList<T> {
         }
     }
 
-    pub fn pop_front(&mut self) -> Option<T> {
-        self.head.take().map(|head| {
-            self.head = head.borrow_mut().next.take().map(|next| {
-                next.borrow_mut().prev = None;
-                next
-            });
-            Rc::try_unwrap(head).ok().unwrap().into_inner().data
-        })
-    }
-
     pub fn push_back(&mut self, data: T) {
         match self.tail.take() {
             Some(tail) => {
@@ -75,6 +65,33 @@ impl<T: Debug> LinkedList<T> {
                 self.head = Some(node);
             }
         }
+    }
+
+    pub fn pop_front(&mut self) -> Option<T> {
+        self.head.take().map(|node| {
+            match node.borrow_mut().next.take() {
+                Some(next) => {
+                    next.borrow_mut().prev = None;
+                    self.head = Some(next);
+                }
+                None => self.tail = None,
+            }
+            Rc::try_unwrap(node).ok().unwrap().into_inner().data
+        })
+    }
+
+    pub fn pop_back(&mut self) -> Option<T> {
+        self.tail.take().map(|tail| {
+            let node = tail.upgrade().unwrap();
+            match node.borrow_mut().prev.take() {
+                Some(prev) => {
+                    prev.upgrade().unwrap().borrow_mut().next = None;
+                    self.tail = Some(prev);
+                }
+                None => self.head = None,
+            }
+            Rc::try_unwrap(node).ok().unwrap().into_inner().data
+        })
     }
 }
 
@@ -103,9 +120,10 @@ fn main() {
     list.push_back(4);
     list.push_back(5);
     assert_eq!(list.pop_front(), Some(1));
+    assert_eq!(list.pop_back(), Some(5));
     assert_eq!(list.pop_front(), Some(2));
+    assert_eq!(list.pop_back(), Some(4));
     assert_eq!(list.pop_front(), Some(3));
-    assert_eq!(list.pop_front(), Some(4));
-    assert_eq!(list.pop_front(), Some(5));
+    assert_eq!(list.pop_back(), None);
     assert_eq!(list.pop_front(), None);
 }
