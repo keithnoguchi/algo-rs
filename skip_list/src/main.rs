@@ -1,7 +1,7 @@
 //! A skip list
 
 use std::cell::RefCell;
-use std::fmt::Debug;
+use std::fmt::{self, Debug, Display};
 use std::rc::Rc;
 
 #[derive(Debug)]
@@ -10,6 +10,15 @@ pub struct SkipList<T: Debug>(Vec<Node<T>>);
 impl<T: Debug> Default for SkipList<T> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl<T: Debug> Display for SkipList<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for row in &self.0 {
+            row.print_row(f)?;
+        }
+        Ok(())
     }
 }
 
@@ -23,7 +32,7 @@ impl<T: Debug + PartialOrd> SkipList<T> {
         for i in (0..self.0.len()).rev() {
             if data > *self.0[i].data.borrow() {
                 if let Some(_child) = self.0[i].insert(data) {
-                    todo!();
+                    //todo!();
                 }
                 return;
             }
@@ -32,7 +41,7 @@ impl<T: Debug + PartialOrd> SkipList<T> {
         let mut node = Node::from(data);
         std::mem::swap(&mut node, &mut self.0[0]);
         let node = Rc::new(RefCell::new(node));
-        self.0[0].next = Some(node.clone());
+        self.0[0].next = Some(node);
     }
 }
 
@@ -100,12 +109,23 @@ impl<T: Debug + PartialOrd> Node<T> {
     }
 }
 
+impl<T: Debug> Node<T> {
+    fn print_row<W: fmt::Write>(&self, w: &mut W) -> fmt::Result {
+        write!(w, "{:?}", self.data.borrow())?;
+        if let Some(ref next) = self.next {
+            write!(w, ",")?;
+            next.borrow().print_row(w)?;
+        }
+        Ok(())
+    }
+}
+
 fn main() {
-    let mut node = Node::from(1);
-    node.insert(4);
-    node.insert(6);
-    node.insert(77);
-    node.insert(84);
-    node.insert(1);
-    println!("{node:?}");
+    let mut list = SkipList::new();
+    list.insert(4);
+    list.insert(6);
+    list.insert(77);
+    list.insert(84);
+    list.insert(1);
+    println!("{list}");
 }
