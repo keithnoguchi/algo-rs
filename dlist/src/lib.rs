@@ -98,10 +98,32 @@ impl<T: Debug> LinkedList<T> {
     pub const fn is_empty(&self) -> bool {
         self.head.is_none()
     }
+
+    pub fn iter(&self) -> ListIter<T> {
+        ListIter {
+            next: self.head.clone(),
+        }
+    }
 }
 
 #[derive(Debug)]
-struct Node<T: Debug> {
+pub struct ListIter<T: Debug> {
+    next: Option<Rc<RefCell<Node<T>>>>,
+}
+
+impl<T: Debug> Iterator for ListIter<T> {
+    type Item = Rc<RefCell<Node<T>>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|node| {
+            self.next = node.borrow().next.clone();
+            node
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct Node<T: Debug> {
     data: T,
     next: Option<Rc<RefCell<Self>>>,
     prev: Option<Weak<RefCell<Self>>>,
