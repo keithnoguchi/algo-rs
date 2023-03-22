@@ -16,13 +16,12 @@ pub enum HuffmanNode {
     Lead(char),
 }
 
-pub fn build_tree(s: &str) {
+pub fn build_tree(s: &str) -> HuffmanNode {
     let mut map = BTreeMap::new();
 
-    for c in s.chars() {
-        let mut e = map.entry(c).or_insert(0);
-        *e += 1;
-    }
+    s.chars().for_each(|c| {
+        *map.entry(c).or_insert(0) += 1;
+    });
     let mut tlist: Vec<HScore> = map
         .into_iter()
         .map(|(k, v)| {
@@ -32,9 +31,32 @@ pub fn build_tree(s: &str) {
             }
         })
         .collect();
-    println!("{tlist:#?}");
+
+    while tlist.len() > 1 {
+        // Gets two lowest score nodes.
+        let last = tlist.len() - 1;
+        for i in 0..last - 1 {
+            if tlist[i].score < tlist[last - 1].score {
+                tlist.swap(i, last - 1);
+            }
+            if tlist[last - 1].score < tlist[last].score {
+                tlist.swap(last - 1, last);
+            }
+        }
+        // Combines into one HuffmanNode.
+        let a = tlist.pop().unwrap();
+        let b = tlist.pop().unwrap();
+        tlist.push(HScore {
+            h: HuffmanNode::Tree(Box::new(a.h), Box::new(b.h)),
+            score: a.score + b.score,
+        });
+    }
+    // Now we got the HuffmanTree.
+    tlist.pop().unwrap().h
 }
 
 fn main() {
-    build_tree("Hello, world!");
+    let tree = build_tree("Hello, world!");
+    println!("{tree:#?}");
+
 }
