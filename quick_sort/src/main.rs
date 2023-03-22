@@ -1,12 +1,14 @@
 //! A quick sort
 
 use std::fmt::Debug;
+use std::thread;
 
 /// O(n * ln(n))
 ///
 /// O(n^2) in case `v` is sorted.
-pub fn quick_sort<T: Debug + PartialOrd>(v: &mut [T]) {
-    println!("quick_sort: {v:?}");
+pub fn quick_sort<T: Debug + PartialOrd + Send>(v: &mut [T]) {
+    let id = thread::current().id();
+    println!("{id:?}: quick_sort: {v:?}");
     if v.len() <= 1 {
         return;
     }
@@ -20,9 +22,14 @@ pub fn quick_sort<T: Debug + PartialOrd>(v: &mut [T]) {
         }
     }
     v.swap(0, pivot);
-    quick_sort(&mut v[..pivot]);
-    quick_sort(&mut v[pivot + 1..]);
-    println!("quick_sort: {v:?}");
+    let (a, b) = v.split_at_mut(pivot);
+    thread::scope(|s| {
+        s.spawn(move || {
+            quick_sort(&mut a[..]);
+        });
+        quick_sort(&mut b[1..]);
+    });
+    println!("{id:?}: quick_sort: {v:?}");
 }
 
 #[cfg(test)]
