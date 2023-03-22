@@ -9,4 +9,5 @@ members = [
     "rand",
     "fibonacci",
     "list",
+    "dlist",
 ]
