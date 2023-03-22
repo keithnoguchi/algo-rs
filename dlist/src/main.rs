@@ -4,6 +4,7 @@
 
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::Deref;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
@@ -73,6 +74,14 @@ pub struct Node<T: Debug> {
     data: T,
     next: Option<Rc<RefCell<Self>>>,
     prev: Option<Weak<RefCell<Self>>>,
+}
+
+impl<T: Debug> Deref for Node<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
 }
 
 impl<T: Debug> Node<T> {
