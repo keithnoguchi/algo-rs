@@ -10,5 +10,6 @@
 
 - [A singly linked list](list/src/main.rs)
 - [A doubly linked list](dlist/src/lib.rs)
+- [A binary tree](tree/src/main.rs)
 
 Happy Hacking!
