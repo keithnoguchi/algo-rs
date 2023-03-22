@@ -21,32 +21,19 @@ impl<T: Debug> Display for Tree<T> {
 
 impl<T: Debug + PartialOrd> Tree<T> {
     pub fn insert(&mut self, data: T) {
-        let rotation_direction = match self.0 {
-            None => {
-                self.0 = Some(Box::new(Node::from(data)));
-                0
-            }
+        match self.0 {
+            None => self.0 = Some(Box::new(Node::from(data))),
             Some(ref mut node) => {
                 if data < node.data {
                     node.left.insert(data);
-                    if node.left.height() - node.right.height() > 1 {
-                        1
-                    } else {
-                        0
-                    }
                 } else {
                     node.right.insert(data);
-                    if node.right.height() - node.left.height() > 1 {
-                        -1
-                    } else {
-                        0
-                    }
                 }
             }
-        };
-        match rotation_direction {
-            1 => self.rotate_right(),
-            -1 => self.rotate_left(),
+        }
+        match self.balance() {
+            n if n > 1 => self.rotate_left(),
+            n if n < -1 => self.rotate_right(),
             _ => self.set_height(),
         }
     }
@@ -57,24 +44,31 @@ impl<T: Debug> Tree<T> {
         Self(None)
     }
 
-    pub const fn height(&self) -> i8 {
+    const fn balance(&self) -> i8 {
+        match self.0 {
+            Some(ref node) => node.right.height() - node.left.height(),
+            None => 0,
+        }
+    }
+
+    const fn height(&self) -> i8 {
         match self.0 {
             Some(ref node) => node.height,
             None => 0,
         }
     }
 
-    pub fn set_height(&mut self) {
+    fn set_height(&mut self) {
         if let Some(ref mut node) = self.0.as_mut() {
             node.set_height();
         }
     }
 
-    pub fn rotate_left(&mut self) {
+    fn rotate_left(&mut self) {
         self.0 = self.0.take().map(|node| node.rotate_left());
     }
 
-    pub fn rotate_right(&mut self) {
+    fn rotate_right(&mut self) {
         self.0 = self.0.take().map(|node| node.rotate_right());
     }
 
@@ -89,7 +83,7 @@ impl<T: Debug> Tree<T> {
 }
 
 #[derive(Debug)]
-pub struct Node<T: Debug> {
+struct Node<T: Debug> {
     data: T,
     height: i8,
     left: Tree<T>,
@@ -150,11 +144,5 @@ fn main() {
     tree.insert(94);
     tree.insert(54);
     tree.insert(3);
-    println!("{tree}");
-
-    tree.rotate_left();
-    println!("{tree}");
-
-    tree.rotate_right();
     println!("{tree}");
 }
