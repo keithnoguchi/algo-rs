@@ -24,6 +24,13 @@ impl<T: Debug> Tree<T> {
         Self(None)
     }
 
+    pub const fn height(&self) -> i8 {
+        match self.0 {
+            Some(ref node) => node.height,
+            None => 0,
+        }
+    }
+
     fn print_depth_first(&self, f: &mut fmt::Formatter<'_>, depth: usize) -> fmt::Result {
         if let Some(ref node) = self.0 {
             node.left.print_depth_first(f, depth + 1)?;
@@ -52,6 +59,7 @@ impl<T: Debug + PartialOrd> Tree<T> {
 #[derive(Debug)]
 pub struct Node<T: Debug> {
     data: T,
+    height: i8,
     left: Tree<T>,
     right: Tree<T>,
 }
@@ -60,6 +68,7 @@ impl<T: Debug> From<T> for Node<T> {
     fn from(data: T) -> Self {
         Self {
             data,
+            height: 0,
             left: Tree::default(),
             right: Tree::default(),
         }
