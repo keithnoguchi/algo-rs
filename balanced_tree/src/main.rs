@@ -57,6 +57,10 @@ impl<T: Debug> Tree<T> {
         self.0 = self.0.take().map(|node| node.rotate_left());
     }
 
+    pub fn rotate_right(&mut self) {
+        self.0 = self.0.take().map(|node| node.rotate_right());
+    }
+
     fn print_depth_first(&self, f: &mut fmt::Formatter<'_>, depth: usize) -> fmt::Result {
         if let Some(ref node) = self.0 {
             node.left.print_depth_first(f, depth + 1)?;
@@ -101,6 +105,19 @@ impl<T: Debug> Node<T> {
         top
     }
 
+    fn rotate_right(mut self) -> Box<Self> {
+        let mut top = match self.left.0.take() {
+            Some(node) => node,
+            None => return Box::new(self),
+        };
+        self.left = Tree(top.right.0.take());
+        self.left.set_height();
+        top.right = Tree(Some(Box::new(self)));
+        top.right.set_height();
+        top.set_height();
+        top
+    }
+
     fn set_height(&mut self) {
         self.height = 1 + std::cmp::max(self.left.height(), self.right.height());
     }
@@ -121,6 +138,6 @@ fn main() {
     tree.rotate_left();
     println!("{tree}");
 
-    tree.rotate_left();
+    tree.rotate_right();
     println!("{tree}");
 }
