@@ -14,16 +14,16 @@ pub struct LinkedList<T: Debug> {
 
 impl<T: Debug> Default for LinkedList<T> {
     fn default() -> Self {
-        Self {
-            head: None,
-            tail: None,
-        }
+        Self::new()
     }
 }
 
 impl<T: Debug> LinkedList<T> {
-    pub fn new() -> Self {
-        Self::default()
+    pub const fn new() -> Self {
+        Self {
+            head: None,
+            tail: None,
+        }
     }
 
     pub fn push_front(&mut self, data: T) {
