@@ -9,6 +9,6 @@
 ## Data structures
 
 - [A singly linked list](list/src/main.rs)
-- [A doubly linked list](dlist/src/main.rs)
+- [A doubly linked list](dlist/src/lib.rs)
 
 Happy Hacking!
