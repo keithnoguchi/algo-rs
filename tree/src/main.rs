@@ -2,10 +2,16 @@
 
 #![forbid(missing_debug_implementations)]
 
-use std::fmt::Debug;
+use std::fmt::{self, Debug, Display};
 
 #[derive(Debug)]
 pub struct Tree<T: Debug>(Option<Box<Node<T>>>);
+
+impl<T: Debug> Display for Tree<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.print_depth_first(f, 0)
+    }
+}
 
 impl<T: Debug> Default for Tree<T> {
     fn default() -> Self {
@@ -14,8 +20,17 @@ impl<T: Debug> Default for Tree<T> {
 }
 
 impl<T: Debug> Tree<T> {
-    pub const fn new() -> Self {
+    const fn new() -> Self {
         Self(None)
+    }
+
+    fn print_depth_first(&self, f: &mut fmt::Formatter<'_>, depth: usize) -> fmt::Result {
+        if let Some(ref node) = self.0 {
+            node.left.print_depth_first(f, depth + 1)?;
+            writeln!(f, "{:.<depth$}{:?}", "", node.data)?;
+            node.right.print_depth_first(f, depth + 1)?;
+        }
+        Ok(())
     }
 }
 
@@ -53,9 +68,13 @@ impl<T: Debug> From<T> for Node<T> {
 
 fn main() {
     let mut tree = Tree::default();
-    tree.insert(String::from("a"));
-    tree.insert(String::from("b"));
-    tree.insert(String::from("A"));
-    tree.insert(String::from("C"));
-    println!("{tree:?}");
+    tree.insert(4);
+    tree.insert(5);
+    tree.insert(6);
+    tree.insert(10);
+    tree.insert(1);
+    tree.insert(94);
+    tree.insert(54);
+    tree.insert(3);
+    print!("{tree}");
 }
