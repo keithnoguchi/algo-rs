@@ -13,10 +13,17 @@ impl<T: Debug> LinkedList<T> {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn push_front(&mut self, data: T) {
+        let next = self.0.take();
+        self.0 = Some((data, Box::new(Self(next))));
+    }
 }
 
 fn main() {
-    let list = LinkedList::<String>::new();
-
+    let mut list = LinkedList::<&str>::new();
+    list.push_front("first");
+    list.push_front("second");
+    list.push_front("third");
     println!("{list:?}");
 }
