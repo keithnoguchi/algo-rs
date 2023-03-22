@@ -4,7 +4,6 @@
 
 use std::cell::RefCell;
 use std::fmt::Debug;
-use std::ops::Deref;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
@@ -40,11 +39,21 @@ impl<T: Debug> LinkedList<T> {
                 self.head = Some(node);
             }
             None => {
-                let node = Rc::new(RefCell::new(Node::new(data)));
+                let node = Rc::new(RefCell::new(Node::from(data)));
                 self.tail = Some(Rc::downgrade(&node));
                 self.head = Some(node);
             }
         }
+    }
+
+    pub fn pop_front(&mut self) -> Option<T> {
+        self.head.take().map(|head| {
+            self.head = head.borrow_mut().next.take().map(|next| {
+                next.borrow_mut().prev = None;
+                next
+            });
+            Rc::try_unwrap(head).ok().unwrap().into_inner().data
+        })
     }
 
     pub fn push_back(&mut self, data: T) {
@@ -55,13 +64,13 @@ impl<T: Debug> LinkedList<T> {
                     next: None,
                     prev: Some(tail.clone()),
                 }));
-                let tail = tail.upgrade().unwrap();
-                let mut tail = tail.borrow_mut();
+                let prev = tail.upgrade().unwrap();
+                let mut prev = prev.borrow_mut();
                 self.tail = Some(Rc::downgrade(&node));
-                tail.next = Some(node);
+                prev.next = Some(node);
             }
             None => {
-                let node = Rc::new(RefCell::new(Node::new(data)));
+                let node = Rc::new(RefCell::new(Node::from(data)));
                 self.tail = Some(Rc::downgrade(&node));
                 self.head = Some(node);
             }
@@ -76,16 +85,8 @@ pub struct Node<T: Debug> {
     prev: Option<Weak<RefCell<Self>>>,
 }
 
-impl<T: Debug> Deref for Node<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.data
-    }
-}
-
-impl<T: Debug> Node<T> {
-    fn new(data: T) -> Self {
+impl<T: Debug> From<T> for Node<T> {
+    fn from(data: T) -> Self {
         Self {
             data,
             next: None,
@@ -101,5 +102,10 @@ fn main() {
     list.push_front(1);
     list.push_back(4);
     list.push_back(5);
-    println!("{list:?}");
+    assert_eq!(list.pop_front(), Some(1));
+    assert_eq!(list.pop_front(), Some(2));
+    assert_eq!(list.pop_front(), Some(3));
+    assert_eq!(list.pop_front(), Some(4));
+    assert_eq!(list.pop_front(), Some(5));
+    assert_eq!(list.pop_front(), None);
 }
