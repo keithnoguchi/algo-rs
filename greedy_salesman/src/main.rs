@@ -55,7 +55,7 @@ impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
         let mut visited = HashSet::new();
         visited.insert(from);
 
-        while let Some(path) = self.closest(start, dests.clone()) {
+        while let Some(path) = self.closest(start, &dests) {
             dests.retain(|v| !visited.contains(v));
             if dests.is_empty() {
                 return Some(path);
@@ -70,10 +70,10 @@ impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
         let from = Rc::new(Path::from(from));
         let mut to_set = HashSet::new();
         to_set.insert(to);
-        self.closest(from, to_set)
+        self.closest(from, &to_set)
     }
 
-    fn closest(&self, from: Rc<Path<K>>, to: HashSet<K>) -> Option<Rc<Path<K>>> {
+    fn closest(&self, from: Rc<Path<K>>, to: &HashSet<K>) -> Option<Rc<Path<K>>> {
         let mut visited = HashSet::new();
 
         let mut candidates = BinaryHeap::new();
