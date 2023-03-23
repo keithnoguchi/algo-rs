@@ -2,7 +2,7 @@
 
 #![forbid(missing_debug_implementations)]
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::error;
 use std::fmt::{self, Debug, Display};
 use std::hash::Hash;
@@ -10,6 +10,81 @@ use std::rc::Rc;
 use std::result;
 
 type Result<T> = result::Result<T, Error>;
+
+#[derive(Debug)]
+pub struct Graph<T, E, ID: Hash> {
+    nodes: HashMap<ID, (T, Vec<ID>)>,
+    edges: HashMap<ID, (E, ID, ID)>,
+}
+
+impl<T, E, ID: Hash> Default for Graph<T, E, ID> {
+    fn default() -> Self {
+        Self {
+            nodes: HashMap::new(),
+            edges: HashMap::new(),
+        }
+    }
+}
+
+impl<T, E: Weighted, ID: Clone + Debug + Eq + Hash> Graph<T, E, ID> {
+    pub fn shortest_path(&self, from: ID, to: ID) -> Option<Rc<Path<ID>>> {
+        let mut visited = HashSet::new();
+        let mut paths = Vec::new();
+
+        paths.push(Rc::new(Path::from(from)));
+        loop {
+            let current = paths.pop()?;
+            if to == current.id {
+                return Some(current);
+            }
+            if visited.contains(&current.id) {
+                continue;
+            }
+            visited.insert(current.id.clone());
+
+            let node = self.nodes.get(&current.id)?;
+            for edge_id in &node.1 {
+                let edge = self.edges.get(edge_id)?;
+                let node_id = if edge.1 == current.id {
+                    edge.2.clone()
+                } else {
+                    edge.1.clone()
+                };
+                let cost = current.cost + edge.0.weight();
+                let path = Rc::new(Path {
+                    id: node_id,
+                    path: Some(current.clone()),
+                    cost,
+                });
+                paths.push(path);
+            }
+        }
+    }
+}
+
+impl<T, E, ID: Clone + Debug + Eq + Hash> Graph<T, E, ID> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn add_node(&mut self, id: ID, data: T) {
+        self.nodes.insert(id, (data, Vec::new()));
+    }
+
+    pub fn add_edge(&mut self, id: ID, from: ID, to: ID, data: E) -> Result<()> {
+        if !self.nodes.contains_key(&from) {
+            return Err(Error::from(format!("invalid from node: {:?}", from)));
+        }
+        if let Some(ref mut node) = self.nodes.get_mut(&to) {
+            node.1.push(id.clone());
+        } else {
+            return Err(Error::from(format!("invalid to node: {:?}", to)));
+        }
+        self.edges.insert(id.clone(), (data, from.clone(), to));
+        self.nodes.get_mut(&from).unwrap().1.push(id);
+        Ok(())
+    }
+}
 
 pub trait Weighted {
     fn weight(&self) -> i32;
@@ -57,45 +132,6 @@ impl<ID: PartialEq> Path<ID> {
                 .map(|path| path.contains(id))
                 .unwrap_or(false)
         }
-    }
-}
-
-#[derive(Debug)]
-pub struct Graph<T, E, ID: Hash> {
-    nodes: HashMap<ID, (T, Vec<ID>)>,
-    edges: HashMap<ID, (E, ID, ID)>,
-}
-
-impl<T, E, ID: Hash> Default for Graph<T, E, ID> {
-    fn default() -> Self {
-        Self {
-            nodes: HashMap::new(),
-            edges: HashMap::new(),
-        }
-    }
-}
-
-impl<T, E, ID: Clone + Debug + Eq + Hash> Graph<T, E, ID> {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn add_node(&mut self, id: ID, data: T) {
-        self.nodes.insert(id, (data, Vec::new()));
-    }
-
-    pub fn add_edge(&mut self, id: ID, from: ID, to: ID, data: E) -> Result<()> {
-        if !self.nodes.contains_key(&from) {
-            return Err(Error::from(format!("invalid from node: {:?}", from)));
-        }
-        if let Some(ref mut node) = self.nodes.get_mut(&to) {
-            node.1.push(id.clone());
-        } else {
-            return Err(Error::from(format!("invalid to node: {:?}", to)));
-        }
-        self.edges.insert(id.clone(), (data, from.clone(), to));
-        self.nodes.get_mut(&from).unwrap().1.push(id);
-        Ok(())
     }
 }
 
