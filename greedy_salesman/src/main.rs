@@ -8,7 +8,8 @@
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
-use std::collections::HashMap;
+use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::cmp::{self, Ord};
 use std::error;
 use std::fmt::{self, Debug, Display};
 use std::hash::Hash;
@@ -27,12 +28,58 @@ pub trait Weighted {
     fn weight(&self) -> i32;
 }
 
+impl Weighted for f32 {
+    fn weight(&self) -> i32 {
+        *self as i32
+    }
+}
+
 impl<K: Hash, V, E> Default for Graph<K, V, E> {
     fn default() -> Self {
         Self {
             vertices: HashMap::new(),
             edges: HashMap::new(),
         }
+    }
+}
+
+impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
+    pub fn shortest_path(&self, from: K, to: K) -> Option<Rc<Path<K>>> {
+        let mut visited = HashSet::new();
+
+        let mut candidates = BinaryHeap::new();
+        let path = Rc::new(Path::from(from.clone()));
+        candidates.push(path);
+        while let Some(path) = candidates.pop() {
+            // Checkes loop.
+            if visited.contains(&path.id) {
+                continue;
+            }
+            visited.insert(path.id.clone());
+
+            // Reaches to the destination.
+            if path.id == to {
+                return Some(path);
+            }
+
+            // Searches for the next vertices.
+            let v = self.vertices.get(&path.id)?;
+            for edge_id in &v.edges {
+                let edge = self.edges.get(edge_id)?;
+                let id = if edge.from == path.id {
+                    edge.to.clone()
+                } else {
+                    edge.from.clone()
+                };
+                let nexthop = Rc::new(Path {
+                    id,
+                    prev: Some(path.clone()),
+                    weight: path.weight + edge.data.weight(),
+                });
+                candidates.push(nexthop);
+            }
+        }
+        None
     }
 }
 
@@ -63,6 +110,54 @@ impl<K: Clone + Debug + Eq + Hash, V, E> Graph<K, V, E> {
         Ok(())
     }
 }
+
+#[derive(Debug)]
+pub struct Path<K> {
+    id: K,
+    weight: i32,
+    prev: Option<Rc<Self>>,
+}
+
+impl<K> From<K> for Path<K> {
+    fn from(id: K) -> Self {
+        Self {
+            id,
+            prev: None,
+            weight: 0,
+        }
+    }
+}
+
+impl<K: PartialEq> Eq for Path<K> {}
+
+impl<K: PartialEq> PartialEq for Path<K> {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl<K: Ord> Ord for Path<K> {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        // Less weight is the higher priority.
+        match self.weight.cmp(&other.weight) {
+            cmp::Ordering::Less => cmp::Ordering::Greater,
+            cmp::Ordering::Greater => cmp::Ordering::Less,
+            cmp::Ordering::Equal => self.id.cmp(&other.id),
+        }
+    }
+}
+
+impl<K: PartialEq> PartialOrd for Path<K> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        // Less weight is the higher priority.
+        match self.weight.cmp(&other.weight) {
+            cmp::Ordering::Less => Some(cmp::Ordering::Greater),
+            cmp::Ordering::Greater => Some(cmp::Ordering::Less),
+            cmp::Ordering::Equal => Some(cmp::Ordering::Equal),
+        }
+    }
+}
+
 
 #[derive(Debug)]
 pub struct Vertex<K, T> {
@@ -107,19 +202,6 @@ impl<K, T> Edge<K, T> {
     }
 }
 
-impl<K> Weighted for Edge<K, f32> {
-    fn weight(&self) -> i32 {
-        self.data as i32
-    }
-}
-
-#[derive(Debug)]
-pub struct Path<K, V> {
-    id: K,
-    data: V,
-    prev: Option<Rc<Self>>,
-}
-
 #[derive(Debug)]
 pub struct Error {
     msg: String,
@@ -155,6 +237,10 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
     g.add_edge(Edge::new('h', 8.0, 'G', 'A'))?;
     g.add_edge(Edge::new('i', 3.0, 'A', 'F'))?;
     g.add_edge(Edge::new('j', 15.0, 'F', 'E'))?;
-    dbg!(g);
+
+    for to in 'A'..='H' {
+        let path = g.shortest_path('A', to);
+        dbg!(path);
+    }
     Ok(())
 }
