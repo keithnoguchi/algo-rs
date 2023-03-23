@@ -15,4 +15,5 @@ members = [
     "skip_list",
     "huffman",
     "graph",
+    "shortest_path",
 ]

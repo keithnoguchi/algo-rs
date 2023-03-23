@@ -16,5 +16,6 @@
 - [A merge sort](merge_sort/src/main.rs)
 - [A quick sort](quick_sort/src/main.rs)
 - [A Huffman Encoding](huffman/src/main.rs)
+- [A shortest path](shortest_path/src/main.rs)
 
 Happy Hacking!
