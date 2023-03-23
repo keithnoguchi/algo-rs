@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use std::error;
 use std::fmt::{self, Debug, Display};
 use std::hash::Hash;
+use std::rc::Rc;
 use std::result;
 
 type Result<T> = result::Result<T, Error>;
@@ -20,6 +21,10 @@ type Result<T> = result::Result<T, Error>;
 pub struct Graph<K: Hash, V, E> {
     vertices: HashMap<K, Vertex<K, V>>,
     edges: HashMap<K, Edge<K, E>>,
+}
+
+pub trait Weighted {
+    fn weight(&self) -> i32;
 }
 
 impl<K: Hash, V, E> Default for Graph<K, V, E> {
@@ -100,6 +105,19 @@ impl<K, T> Edge<K, T> {
     pub fn new(id: K, data: T, from: K, to: K) -> Self {
         Self { id, data, from, to }
     }
+}
+
+impl<K> Weighted for Edge<K, f32> {
+    fn weight(&self) -> i32 {
+        self.data as i32
+    }
+}
+
+#[derive(Debug)]
+pub struct Path<K, V> {
+    id: K,
+    data: V,
+    prev: Option<Rc<Self>>,
 }
 
 #[derive(Debug)]
