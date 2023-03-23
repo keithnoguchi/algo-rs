@@ -17,6 +17,20 @@ pub enum HuffmanNode {
 }
 
 impl HuffmanNode {
+    pub fn encode_str(&self, s: &str) -> Option<Vec<char>> {
+        let mut result = Vec::new();
+        for c in s.chars() {
+            if let Some(v) = self.encode_char(c) {
+                result.extend(v);
+            }
+        }
+        if result.is_empty() {
+            None
+        } else {
+            Some(result)
+        }
+    }
+
     pub fn encode_char(&self, c: char) -> Option<Vec<char>> {
         match self {
             Self::Tree(l, r) => {
@@ -105,4 +119,6 @@ fn main() {
     for c in chars {
         println!("{:?} = {:?}", c, tree.encode_char(c));
     }
+
+    println!("{} = {:?}", s, tree.encode_str(s));
 }
