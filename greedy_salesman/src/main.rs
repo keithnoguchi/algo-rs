@@ -8,8 +8,8 @@
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
-use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::cmp::{self, Ord};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::error;
 use std::fmt::{self, Debug, Display};
 use std::hash::Hash;
@@ -48,7 +48,7 @@ impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
         let mut visited = HashSet::new();
 
         let mut candidates = BinaryHeap::new();
-        let path = Rc::new(Path::from(from.clone()));
+        let path = Rc::new(Path::from(from));
         candidates.push(path);
         while let Some(path) = candidates.pop() {
             // Checkes loop.
@@ -130,15 +130,12 @@ impl<K> From<K> for Path<K> {
 
 impl<K: Display> Display for Path<K> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(path) = &self.prev {
+        let Self { id, weight, prev } = self;
+        if let Some(path) = prev {
             // depth first display.
-            write!(f, "{path}")?;
+            write!(f, "{path}-{weight}-")?;
         }
-        if self.weight == 0 {
-            write!(f, "{}", self.id)
-        } else {
-            write!(f, "-{}-{}", self.weight, self.id)
-        }
+        write!(f, "{id}")
     }
 }
 
@@ -171,7 +168,6 @@ impl<K: PartialEq> PartialOrd for Path<K> {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct Vertex<K, T> {
@@ -254,10 +250,8 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
 
     for from in 'A'..='H' {
         for to in 'A'..='H' {
-            if from != to {
-                if let Some(path) = g.shortest_path(from, to) {
-                    println!("{path}");
-                }
+            if let Some(path) = g.shortest_path(from, to) {
+                println!("{path}");
             }
         }
     }
