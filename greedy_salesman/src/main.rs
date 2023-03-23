@@ -44,23 +44,54 @@ impl<K: Hash, V, E> Default for Graph<K, V, E> {
 }
 
 impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
+    pub fn greedy_salesman(&self, from: K) -> Option<Rc<Path<K>>> {
+        let mut start = Rc::new(Path::from(from.clone()));
+        let mut dests: HashSet<_> = self
+            .vertices
+            .keys()
+            .filter(|v| **v != from)
+            .map(|v| v.clone())
+            .collect();
+        let mut visited = HashSet::new();
+        visited.insert(from);
+
+        while let Some(path) = self.closest(start, dests.clone()) {
+            dests = dests
+                .into_iter()
+                .filter(|v| !visited.contains(v))
+                .collect();
+            if dests.is_empty() {
+                return Some(path);
+            }
+            visited.insert(path.id.clone());
+            start = path;
+        }
+        None
+    }
+
     pub fn shortest_path(&self, from: K, to: K) -> Option<Rc<Path<K>>> {
+        let from = Rc::new(Path::from(from));
+        let mut to_set = HashSet::new();
+        to_set.insert(to);
+        self.closest(from, to_set)
+    }
+
+    fn closest(&self, from: Rc<Path<K>>, to: HashSet<K>) -> Option<Rc<Path<K>>> {
         let mut visited = HashSet::new();
 
         let mut candidates = BinaryHeap::new();
-        let path = Rc::new(Path::from(from));
-        candidates.push(path);
+        candidates.push(from);
         while let Some(path) = candidates.pop() {
-            // Checkes loop.
+            // Reaches to the destination.
+            if to.contains(&path.id) {
+                return Some(path);
+            }
+
+            // Checks the loop.
             if visited.contains(&path.id) {
                 continue;
             }
             visited.insert(path.id.clone());
-
-            // Reaches to the destination.
-            if path.id == to {
-                return Some(path);
-            }
 
             // Searches for the next vertices.
             let v = self.vertices.get(&path.id)?;
@@ -249,10 +280,8 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
     g.add_edge(Edge::new('j', 15.0, 'F', 'E'))?;
 
     for from in 'A'..='H' {
-        for to in 'A'..='H' {
-            if let Some(path) = g.shortest_path(from, to) {
-                println!("{path}");
-            }
+        if let Some(path) = g.greedy_salesman(from) {
+            println!("{path}");
         }
     }
     Ok(())
