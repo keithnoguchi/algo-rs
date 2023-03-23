@@ -5,6 +5,20 @@
 //! 5   7 - A - 4 -    + 12 +
 //! |      / \               \
 //! G - 8 -   - 3 - F - 15 - E
+//!
+//! # Examples
+//!
+//! ```
+//! $ cargo r -q
+//! A-3-F-6-A-10-C-20-B-30-C-34-A-41-H-46-G-51-H-57-D-63-H-70-A-74-C-86-E-98-C-102-A
+//! B-10-C-14-A-17-F-20-A-27-H-32-G-37-H-43-D-49-H-56-A-60-C-72-E-84-C-94-B
+//! C-4-A-7-F-10-A-17-H-22-G-27-H-33-D-39-H-46-A-50-C-60-B-70-C-82-E-94-C
+//! D-6-H-11-G-19-A-22-F-25-A-29-C-39-B-49-C-61-E-73-C-77-A-84-H-90-D
+//! E-12-C-16-A-19-F-22-A-29-H-34-G-39-H-45-D-51-H-58-A-62-C-72-B-82-C-94-E
+//! F-3-A-7-C-17-B-27-C-31-A-38-H-43-G-48-H-54-D-60-H-67-A-71-C-83-E-98-F
+//! G-5-H-11-D-17-H-24-A-27-F-30-A-34-C-44-B-54-C-66-E-78-C-82-A-90-G
+//! H-5-G-13-A-16-F-19-A-23-C-33-B-43-C-55-E-67-C-71-A-78-H-84-D-90-H
+//! ```
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
@@ -52,15 +66,16 @@ impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
             .cloned()
             .collect();
 
-        let mut next = Rc::new(Path::from(from));
-        while let Some(path) = self.closest(next, &to_visits) {
+        // Greedy visit all the city.
+        let mut path = Rc::new(Path::from(from.clone()));
+        while !to_visits.is_empty() {
+            path = self.closest(path, &to_visits)?;
             to_visits.remove(&path.id);
-            if to_visits.is_empty() {
-                return Some(path);
-            }
-            next = path;
         }
-        None
+
+        // Returns back to the start.
+        to_visits.insert(from);
+        self.closest(path, &to_visits)
     }
 
     pub fn shortest_path(&self, from: K, to: K) -> Option<Rc<Path<K>>> {
