@@ -50,13 +50,28 @@ impl<T, E: Weighted, ID: Clone + Debug + Eq + Hash> Graph<T, E, ID> {
                 } else {
                     edge.1.clone()
                 };
-                let cost = current.cost + edge.0.weight();
                 let path = Rc::new(Path {
                     id: node_id,
+                    cost: current.cost + edge.0.weight(),
                     path: Some(current.clone()),
-                    cost,
                 });
-                paths.push(path);
+                // least cost path last.
+                if paths.is_empty() {
+                    paths.push(path);
+                    continue;
+                }
+                let mut i = paths.len() - 1;
+                loop {
+                    if path.cost < paths[i].cost {
+                        paths.insert(i + 1, path);
+                        break;
+                    }
+                    if i == 0 {
+                        paths.insert(i, path);
+                        break;
+                    }
+                    i -= 1;
+                }
             }
         }
     }
@@ -99,8 +114,8 @@ impl Weighted for i32 {
 #[derive(Debug)]
 pub struct Path<ID> {
     id: ID,
-    path: Option<Rc<Self>>,
     cost: i32,
+    path: Option<Rc<Self>>,
 }
 
 impl<ID: Debug> Display for Path<ID> {
@@ -108,7 +123,7 @@ impl<ID: Debug> Display for Path<ID> {
         if let Some(ref path) = self.path {
             write!(f, "{}-{}-", path, self.cost)?;
         }
-        write!(f, "{:?} ", self.id)
+        write!(f, "{:?}", self.id)
     }
 }
 
@@ -178,6 +193,10 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
     g.add_edge('i', 'F', 'E', 15)?;
     g.add_edge('j', 'C', 'E', 12)?;
 
-    dbg!(g);
+    for to in 'B'..='H' {
+        if let Some(path) = g.shortest_path('A', to) {
+            println!("{path}");
+        }
+    }
     Ok(())
 }
