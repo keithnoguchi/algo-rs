@@ -6,9 +6,59 @@ use std::collections::HashMap;
 use std::error;
 use std::fmt::{self, Debug, Display};
 use std::hash::Hash;
+use std::rc::Rc;
 use std::result;
 
 type Result<T> = result::Result<T, Error>;
+
+pub trait Weighted {
+    fn weight(&self) -> i32;
+}
+
+impl Weighted for i32 {
+    fn weight(&self) -> i32 {
+        *self
+    }
+}
+
+#[derive(Debug)]
+pub struct Path<ID> {
+    id: ID,
+    path: Option<Rc<Self>>,
+    cost: i32,
+}
+
+impl<ID: Debug> Display for Path<ID> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(ref path) = self.path {
+            write!(f, "{}-{}-", path, self.cost)?;
+        }
+        write!(f, "{:?} ", self.id)
+    }
+}
+
+impl<ID> From<ID> for Path<ID> {
+    fn from(id: ID) -> Self {
+        Self {
+            id,
+            path: None,
+            cost: 0,
+        }
+    }
+}
+
+impl<ID: PartialEq> Path<ID> {
+    pub fn contains(&self, id: &ID) -> bool {
+        if *id == self.id {
+            true
+        } else {
+            self.path
+                .as_ref()
+                .map(|path| path.contains(id))
+                .unwrap_or(false)
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct Graph<T, E, ID: Hash> {
