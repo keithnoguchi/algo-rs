@@ -49,17 +49,14 @@ impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
         let mut dests: HashSet<_> = self
             .vertices
             .keys()
-            .filter(|v| **v != from)
-            .map(|v| v.clone())
+            .filter(|&v| *v != from)
+            .cloned()
             .collect();
         let mut visited = HashSet::new();
         visited.insert(from);
 
         while let Some(path) = self.closest(start, dests.clone()) {
-            dests = dests
-                .into_iter()
-                .filter(|v| !visited.contains(v))
-                .collect();
+            dests.retain(|v| !visited.contains(v));
             if dests.is_empty() {
                 return Some(path);
             }
