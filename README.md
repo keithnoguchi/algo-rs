@@ -17,5 +17,6 @@
 - [A quick sort](quick_sort/src/main.rs)
 - [A Huffman Encoding](huffman/src/main.rs)
 - [A shortest path](shortest_path/src/main.rs)
+- [A greedy salesman](greedy_salesman/src/main.rs)
 
 Happy Hacking!
