@@ -11,33 +11,6 @@ use std::result;
 type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug)]
-pub struct Error {
-    msg: String,
-}
-
-impl error::Error for Error {}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.msg)
-    }
-}
-
-impl From<&str> for Error {
-    fn from(msg: &str) -> Self {
-        Self {
-            msg: msg.to_string(),
-        }
-    }
-}
-
-impl From<String> for Error {
-    fn from(msg: String) -> Self {
-        Self { msg }
-    }
-}
-
-#[derive(Debug)]
 pub struct Graph<T, E, ID: Hash> {
     nodes: HashMap<ID, (T, Vec<ID>)>,
     edges: HashMap<ID, (E, ID, ID)>,
@@ -73,6 +46,33 @@ impl<T, E, ID: Clone + Debug + Eq + Hash> Graph<T, E, ID> {
         self.edges.insert(id.clone(), (data, from.clone(), to));
         self.nodes.get_mut(&from).unwrap().1.push(id);
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct Error {
+    msg: String,
+}
+
+impl error::Error for Error {}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.msg)
+    }
+}
+
+impl From<&str> for Error {
+    fn from(msg: &str) -> Self {
+        Self {
+            msg: msg.to_string(),
+        }
+    }
+}
+
+impl From<String> for Error {
+    fn from(msg: String) -> Self {
+        Self { msg }
     }
 }
 
