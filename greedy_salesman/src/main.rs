@@ -128,6 +128,20 @@ impl<K> From<K> for Path<K> {
     }
 }
 
+impl<K: Display> Display for Path<K> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(path) = &self.prev {
+            // depth first display.
+            write!(f, "{path}")?;
+        }
+        if self.weight == 0 {
+            write!(f, "{}", self.id)
+        } else {
+            write!(f, "-{}-{}", self.weight, self.id)
+        }
+    }
+}
+
 impl<K: PartialEq> Eq for Path<K> {}
 
 impl<K: PartialEq> PartialEq for Path<K> {
@@ -238,9 +252,14 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
     g.add_edge(Edge::new('i', 3.0, 'A', 'F'))?;
     g.add_edge(Edge::new('j', 15.0, 'F', 'E'))?;
 
-    for to in 'A'..='H' {
-        let path = g.shortest_path('A', to);
-        dbg!(path);
+    for from in 'A'..='H' {
+        for to in 'A'..='H' {
+            if from != to {
+                if let Some(path) = g.shortest_path(from, to) {
+                    println!("{path}");
+                }
+            }
+        }
     }
     Ok(())
 }
