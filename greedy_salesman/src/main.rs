@@ -45,23 +45,20 @@ impl<K: Hash, V, E> Default for Graph<K, V, E> {
 
 impl<K: Clone + Eq + Ord + Hash, V, E: Weighted> Graph<K, V, E> {
     pub fn greedy_salesman(&self, from: K) -> Option<Rc<Path<K>>> {
-        let mut start = Rc::new(Path::from(from.clone()));
-        let mut dests: HashSet<_> = self
+        let mut to_visits: HashSet<_> = self
             .vertices
             .keys()
             .filter(|&v| *v != from)
             .cloned()
             .collect();
-        let mut visited = HashSet::new();
-        visited.insert(from);
 
-        while let Some(path) = self.closest(start, &dests) {
-            dests.retain(|v| !visited.contains(v));
-            if dests.is_empty() {
+        let mut next = Rc::new(Path::from(from));
+        while let Some(path) = self.closest(next, &to_visits) {
+            to_visits.remove(&path.id);
+            if to_visits.is_empty() {
                 return Some(path);
             }
-            visited.insert(path.id.clone());
-            start = path;
+            next = path;
         }
         None
     }
