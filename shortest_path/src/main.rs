@@ -1,4 +1,10 @@
 //! A shortest path first.
+//!
+//! H - 6 - D - 18 - C - 10 - B
+//! | \             / \
+//! 5   7 - A - 4 -    + 12 +
+//! |      / \               \
+//! G - 8 -   - 3 - F - 15 - E
 
 #![forbid(missing_debug_implementations)]
 
