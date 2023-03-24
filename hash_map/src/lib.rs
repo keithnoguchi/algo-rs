@@ -10,3 +10,13 @@ pub struct HMap<K, V> {
     main: BucketList<K, V>,
     grow: BucketList<K, V>,
 }
+
+impl<K, V> Default for HMap<K, V> {
+    fn default() -> Self {
+        Self {
+            n_moved: 0,
+            main: BucketList::default(),
+            grow: BucketList::default(),
+        }
+    }
+}

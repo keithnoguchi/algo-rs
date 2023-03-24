@@ -12,7 +12,7 @@ pub struct BucketList<K, V> {
     buckets: Vec<Vec<(K, V)>>,
 }
 
-impl<K: Eq + Hash, V> Default for BucketList<K, V> {
+impl<K, V> Default for BucketList<K, V> {
     fn default() -> Self {
         Self {
             seed: rand::random(),
