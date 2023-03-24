@@ -41,11 +41,9 @@ where
     K: Clone + Eq + Ord + Hash,
     E: Copy + Add<Output = E> + Default + PartialOrd,
 {
-    pub fn shortest_path(&self, start: K, end: K) -> Option<Rc<MinPath<K, E>>> {
+    pub fn shortest_path(&self, start: Rc<MinPath<K, E>>, end: K) -> Option<Rc<MinPath<K, E>>> {
         let mut visited = HashSet::new();
         let mut shortest = BinaryHeap::new();
-
-        let start = Rc::new(MinPath::new(start));
         shortest.push(start);
 
         while let Some(path) = shortest.pop() {
@@ -229,8 +227,9 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
     g.add_edge(Edge::new('G', 'H', 5.0))?;
 
     for start in 'A'..='H' {
+        let start = Rc::new(MinPath::new(start));
         for end in 'A'..='H' {
-            if let Some(path) = g.shortest_path(start, end) {
+            if let Some(path) = g.shortest_path(start.clone(), end) {
                 println!("{path}");
             }
         }
