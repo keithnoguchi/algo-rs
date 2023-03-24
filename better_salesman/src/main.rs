@@ -8,10 +8,13 @@
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
-use std::collections::HashMap;
+use std::cmp::{self, Ord};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::error;
 use std::fmt::{self, Debug, Display};
 use std::hash::Hash;
+use std::ops::Add;
+use std::rc::Rc;
 use std::result;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::Relaxed;
@@ -30,6 +33,47 @@ impl<K: Hash, V, E> Default for Graph<K, V, E> {
             vertices: HashMap::new(),
             edges: HashMap::new(),
         }
+    }
+}
+
+impl<K, V, E> Graph<K, V, E>
+where
+    K: Clone + Eq + Ord + Hash,
+    E: Copy + Add<Output = E> + Default + PartialOrd,
+{
+    pub fn shortest_path(&self, start: K, end: K) -> Option<Rc<MinPath<K, E>>> {
+        let mut visited = HashSet::new();
+        let mut shortest = BinaryHeap::new();
+
+        let start = Rc::new(MinPath::new(start, E::default()));
+        shortest.push(start);
+
+        while let Some(path) = shortest.pop() {
+            if path.id == end {
+                return Some(path);
+            }
+            if visited.contains(&path.id) {
+                continue;
+            }
+            visited.insert(path.id.clone());
+
+            let v = self.vertices.get(&path.id)?;
+            for edge_id in &v.edges {
+                let edge = self.edges.get(edge_id)?;
+                let vertex_id = if edge.start == path.id {
+                    edge.end.clone()
+                } else {
+                    edge.start.clone()
+                };
+                let candidate = Rc::new(MinPath {
+                    id: vertex_id,
+                    data: path.data + edge.data,
+                    prev: Some(path.clone()),
+                });
+                shortest.push(candidate);
+            }
+        }
+        None
     }
 }
 
@@ -68,6 +112,12 @@ pub struct Vertex<K, T> {
     edges: Vec<usize>,
 }
 
+impl<K, T: Debug> Display for Vertex<K, T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self.data)
+    }
+}
+
 impl<K, T> Vertex<K, T> {
     pub fn new(id: K, data: T) -> Self {
         Self {
@@ -100,6 +150,57 @@ impl<K, T> Edge<K, T> {
 }
 
 #[derive(Debug)]
+pub struct MinPath<K, T> {
+    id: K,
+    data: T,
+    prev: Option<Rc<Self>>,
+}
+
+impl<K: Display, T: Display> Display for MinPath<K, T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(path) = &self.prev {
+            write!(f, "{path}-{}-", self.data)?;
+        }
+        write!(f, "{}", self.id)
+    }
+}
+
+impl<K: PartialEq, T> Eq for MinPath<K, T> {}
+
+impl<K: PartialEq, T> PartialEq for MinPath<K, T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl<K: PartialOrd, T: PartialOrd> PartialOrd for MinPath<K, T> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        match self.data.partial_cmp(&other.data) {
+            Some(cmp::Ordering::Greater) => Some(cmp::Ordering::Less),
+            Some(cmp::Ordering::Less) => Some(cmp::Ordering::Greater),
+            Some(cmp::Ordering::Equal) => self.id.partial_cmp(&other.id),
+            None => None,
+        }
+    }
+}
+
+impl<K: Ord, T: PartialOrd> Ord for MinPath<K, T> {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        self.partial_cmp(other).unwrap_or(self.id.cmp(&other.id))
+    }
+}
+
+impl<K, T> MinPath<K, T> {
+    pub fn new(id: K, data: T) -> Self {
+        Self {
+            id,
+            data,
+            prev: None,
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct Error(String);
 
 impl error::Error for Error {}
@@ -111,7 +212,7 @@ impl Display for Error {
 }
 
 fn main() -> result::Result<(), Box<dyn error::Error>> {
-    // Setup graph.
+    // Setup a graph.
     let mut g = Graph::new();
     for k in 'A'..='H' {
         g.add_vertex(Vertex::new(k, ()));
@@ -126,6 +227,14 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
     g.add_edge(Edge::new('D', 'H', 6.0))?;
     g.add_edge(Edge::new('E', 'F', 15.0))?;
     g.add_edge(Edge::new('G', 'H', 5.0))?;
-    dbg!(g);
+
+    for start in 'A'..='H' {
+        for end in 'A'..='H' {
+            if let Some(path) = g.shortest_path(start, end) {
+                println!("{path}");
+            }
+        }
+    }
+
     Ok(())
 }
