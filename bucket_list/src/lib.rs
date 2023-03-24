@@ -31,6 +31,14 @@ impl<K: Eq + Hash, V> BucketList<K, V> {
         self.buckets[h].len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.len
+    }
+
     pub fn get<Q>(&self, k: &Q) -> Option<&V>
     where
         K: Borrow<Q>,

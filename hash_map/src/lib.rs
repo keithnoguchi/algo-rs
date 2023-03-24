@@ -66,4 +66,12 @@ impl<K: Eq + Hash, V> HMap<K, V> {
     {
         self.main.get_mut(k).or_else(|| self.grow.get_mut(k))
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.main.len() + self.grow.len()
+    }
 }
