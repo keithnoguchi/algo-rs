@@ -45,7 +45,7 @@ where
         let mut visited = HashSet::new();
         let mut shortest = BinaryHeap::new();
 
-        let start = Rc::new(MinPath::new(start, E::default()));
+        let start = Rc::new(MinPath::new(start));
         shortest.push(start);
 
         while let Some(path) = shortest.pop() {
@@ -190,11 +190,11 @@ impl<K: Ord, T: PartialOrd> Ord for MinPath<K, T> {
     }
 }
 
-impl<K, T> MinPath<K, T> {
-    pub fn new(id: K, data: T) -> Self {
+impl<K, T: Default> MinPath<K, T> {
+    pub fn new(id: K) -> Self {
         Self {
             id,
-            data,
+            data: T::default(),
             prev: None,
         }
     }
