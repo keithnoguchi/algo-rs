@@ -19,5 +19,6 @@
 - [A shortest path](shortest_path/src/main.rs)
 - [A greedy salesman](greedy_salesman/src/main.rs)
 - [A better salesman](better_salesman/src/main.rs)
+- [A hasher](hasher/src/lib.rs)
 
 Happy Hacking!
