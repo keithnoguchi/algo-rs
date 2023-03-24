@@ -19,7 +19,7 @@ pub fn quick_sort<T: Debug + PartialOrd + Send>(v: &mut [T]) {
 }
 
 fn pivot<T: PartialOrd + Send>(v: &mut [T]) -> usize {
-    let mut pivot = rand::rand(v.len());
+    let mut pivot = random::rand(v.len());
     v.swap(0, pivot);
     pivot = 0;
     for i in 1..v.len() {

@@ -6,7 +6,7 @@ members = [
     "bubble_sort",
     "merge_sort",
     "quick_sort",
-    "rand",
+    "random",
     "fibonacci",
     "list",
     "dlist",
