@@ -9,7 +9,7 @@ use std::hash::Hash;
 pub struct BucketList<K, V> {
     seed: u64,
     len: usize,
-    buckets: Vec<Vec<(K, V)>>,
+    pub buckets: Vec<Vec<(K, V)>>,
 }
 
 impl<K, V> Default for BucketList<K, V> {

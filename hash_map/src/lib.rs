@@ -7,13 +7,16 @@ use std::hash::Hash;
 
 use bucket_list::BucketList;
 
-// Each bucket size before growing the number of buckets.
+// Each bucket size before increase the total number of buckets.
 const BSIZE: usize = 8;
+
+// Incremental number of increased buckets.
+const BGROW: usize = 4;
 
 #[derive(Debug)]
 pub struct HMap<K, V> {
     n_moved: usize,
-    main: BucketList<K, V>,
+    pub(crate) main: BucketList<K, V>,
     grow: BucketList<K, V>,
 }
 
@@ -44,10 +47,12 @@ impl<K: Eq + Hash, V> HMap<K, V> {
 
         if self.n_moved > 0 {
             self.grow.push(k, v);
+            self.move_bucket();
             return;
         }
         if self.main.push(k, v) > BSIZE / 2 {
-            // grow buckets.
+            // start the grow the buckets.
+            self.move_bucket();
         }
     }
 
@@ -74,4 +79,23 @@ impl<K: Eq + Hash, V> HMap<K, V> {
     pub fn len(&self) -> usize {
         self.main.len() + self.grow.len()
     }
+
+    fn move_bucket(&mut self) {
+        if self.n_moved == 0 {
+            self.grow.set_buckets(self.main.len() + BGROW);
+        }
+        if let Some(b) = self.main.bucket(self.n_moved) {
+            for (k, v) in b {
+                self.grow.push(k, v);
+            }
+            self.n_moved += 1;
+            return;
+        }
+        // main bucket is now empty.
+        std::mem::swap(&mut self.grow, &mut self.main);
+        self.n_moved = 0;
+    }
 }
+
+#[cfg(test)]
+mod test;
