@@ -1,14 +1,12 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+//! A hash map
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#![forbid(unsafe_code, missing_debug_implementations)]
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+use bucket_list::BucketList;
+
+#[derive(Debug)]
+pub struct HMap<K, V> {
+    n_moved: usize,
+    main: BucketList<K, V>,
+    grow: BucketList<K, V>,
 }
