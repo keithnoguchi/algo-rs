@@ -9,7 +9,7 @@
 - [A balanced binary tree](balanced_tree/src/main.rs)
 - [A skip list](skip_list/src/main.rs)
 - [A graph](graph/src/main.rs)
-- [A bucket list](bucket_list/src/main.rs)
+- [A bucket list](bucket_list/src/lib.rs)
 - [A hash map](hash_map/src/lib.rs)
 
 ## Algorithms

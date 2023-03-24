@@ -2,6 +2,7 @@
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
+use std::borrow::{Borrow, BorrowMut};
 use std::hash::Hash;
 
 use bucket_list::BucketList;
@@ -48,5 +49,21 @@ impl<K: Eq + Hash, V> HMap<K, V> {
         if self.main.push(k, v) > BSIZE / 2 {
             // grow buckets.
         }
+    }
+
+    pub fn get<Q>(&self, k: &Q) -> Option<&V>
+    where
+        K: Borrow<Q>,
+        Q: Eq + Hash + ?Sized,
+    {
+        self.main.get(k).or_else(|| self.grow.get(k))
+    }
+
+    pub fn get_mut<Q>(&mut self, k: &Q) -> Option<&mut V>
+    where
+        K: BorrowMut<Q>,
+        Q: Eq + Hash + ?Sized,
+    {
+        self.main.get_mut(k).or_else(|| self.grow.get_mut(k))
     }
 }
