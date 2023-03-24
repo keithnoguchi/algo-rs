@@ -5,6 +5,20 @@
 //! 5   7 - A - 4 -    + 12 +
 //! |      / \               \
 //! G - 8 -   - 3 - F - 15 - E
+//!
+//! # Examples
+//!
+//! ```
+//! $ cargo r -q
+//! A-7-H-13-D-19-H-24-G-32-A-36-C-46-B-56-C-68-E-83-F-86-A
+//! B-10-C-14-A-21-H-27-D-33-H-38-G-46-A-49-F-64-E-76-C-86-B
+//! C-4-A-12-G-17-H-23-D-29-H-36-A-39-F-54-E-66-C-76-B-86-C
+//! D-6-H-11-G-19-A-22-F-37-E-49-C-59-B-69-C-73-A-80-H-86-D
+//! E-12-C-22-B-32-C-36-A-43-H-49-D-55-H-60-G-68-A-71-F-86-E
+//! F-15-E-27-C-37-B-47-C-51-A-58-H-64-D-70-H-75-G-83-A-86-F
+//! G-5-H-11-D-17-H-24-A-27-F-42-E-54-C-64-B-74-C-78-A-86-G
+//! H-7-A-10-F-25-E-37-C-47-B-57-C-61-A-69-G-74-H-80-D-86-H
+//! ```
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
@@ -18,6 +32,8 @@ use std::rc::Rc;
 use std::result;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::Relaxed;
+
+use rand::prelude::SliceRandom;
 
 type Result<T> = result::Result<T, Error>;
 
@@ -41,6 +57,43 @@ where
     K: Clone + Eq + Ord + Hash,
     E: Copy + Add<Output = E> + Default + PartialOrd,
 {
+    pub fn iter_salesman(&self, start: K) -> Option<Rc<MinPath<K, E>>> {
+        let mut vertices: Vec<_> = self.vertices.keys().cloned().collect();
+        vertices.shuffle(&mut rand::thread_rng());
+
+        // Moves the start to the front.
+        for i in 0..vertices.len() {
+            if vertices[i] == start {
+                vertices.swap(i, 0);
+                break;
+            }
+        }
+        // Closes the loop.
+        vertices.push(start);
+
+        // Finds the best path with multiple random retries.
+        let mut best = self.complete_path(&vertices)?;
+        let mut retry = 0;
+        loop {
+            // swap vertex except the start and the end.
+            let mut try_vertices = vertices.clone();
+            let sa = (rand::random::<usize>() % (try_vertices.len() - 2)) + 1;
+            let sb = (rand::random::<usize>() % (try_vertices.len() - 2)) + 1;
+            try_vertices.swap(sa, sb);
+            let path = self.complete_path(&try_vertices)?;
+            if path.data < best.data {
+                best = path;
+                vertices = try_vertices;
+                retry = 0;
+            } else {
+                retry += 1;
+            }
+            if retry >= 60 {
+                return Some(best);
+            }
+        }
+    }
+
     /// Get the completed path of visiting all the vertices.
     pub fn complete_path(&self, vertices: &[K]) -> Option<Rc<MinPath<K, E>>> {
         if vertices.len() < 2 {
@@ -253,8 +306,10 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
 
     let mut destinations: Vec<_> = g.vertices.keys().copied().collect();
     destinations.push(destinations[0]);
-    if let Some(path) = g.complete_path(&destinations) {
-        println!("{path}");
+    for start in 'A'..='H' {
+        if let Some(path) = g.iter_salesman(start) {
+            println!("{path}");
+        }
     }
 
     Ok(())

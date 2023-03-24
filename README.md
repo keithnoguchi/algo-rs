@@ -18,5 +18,6 @@
 - [A Huffman Encoding](huffman/src/main.rs)
 - [A shortest path](shortest_path/src/main.rs)
 - [A greedy salesman](greedy_salesman/src/main.rs)
+- [A better salesman](better_salesman/src/main.rs)
 
 Happy Hacking!
