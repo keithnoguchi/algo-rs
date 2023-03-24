@@ -41,6 +41,21 @@ where
     K: Clone + Eq + Ord + Hash,
     E: Copy + Add<Output = E> + Default + PartialOrd,
 {
+    /// Get the completed path of visiting all the vertices.
+    pub fn complete_path(&self, vertices: &[K]) -> Option<Rc<MinPath<K, E>>> {
+        if vertices.len() < 2 {
+            return None;
+        }
+
+        let mut complete_path = Rc::new(MinPath::new(vertices[0].clone()));
+        for v_id in &vertices[1..vertices.len() - 1] {
+            if !complete_path.contains(v_id) {
+                complete_path = self.shortest_path(complete_path, v_id.clone())?;
+            }
+        }
+        self.shortest_path(complete_path, vertices[vertices.len() - 1].clone())
+    }
+
     pub fn shortest_path(&self, start: Rc<MinPath<K, E>>, end: K) -> Option<Rc<MinPath<K, E>>> {
         let mut visited = HashSet::new();
         let mut shortest = BinaryHeap::new();
@@ -188,12 +203,22 @@ impl<K: Ord, T: PartialOrd> Ord for MinPath<K, T> {
     }
 }
 
-impl<K, T: Default> MinPath<K, T> {
+impl<K: Eq, T: Default> MinPath<K, T> {
     pub fn new(id: K) -> Self {
         Self {
             id,
             data: T::default(),
             prev: None,
+        }
+    }
+
+    pub fn contains(&self, id: &K) -> bool {
+        if self.id == *id {
+            return true;
+        }
+        match self.prev {
+            Some(ref path) => path.contains(id),
+            None => false,
         }
     }
 }
@@ -226,13 +251,10 @@ fn main() -> result::Result<(), Box<dyn error::Error>> {
     g.add_edge(Edge::new('E', 'F', 15.0))?;
     g.add_edge(Edge::new('G', 'H', 5.0))?;
 
-    for start in 'A'..='H' {
-        let start = Rc::new(MinPath::new(start));
-        for end in 'A'..='H' {
-            if let Some(path) = g.shortest_path(start.clone(), end) {
-                println!("{path}");
-            }
-        }
+    let mut destinations: Vec<_> = g.vertices.keys().copied().collect();
+    destinations.push(destinations[0]);
+    if let Some(path) = g.complete_path(&destinations) {
+        println!("{path}");
     }
 
     Ok(())
