@@ -17,4 +17,5 @@ members = [
     "graph",
     "shortest_path",
     "greedy_salesman",
+    "better_salesman",
 ]
