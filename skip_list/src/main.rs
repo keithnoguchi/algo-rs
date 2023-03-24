@@ -47,7 +47,7 @@ impl<T: Debug + PartialOrd> SkipList<T> {
     }
 
     fn loop_up(&mut self, child: Rc<RefCell<Node<T>>>, n: usize) {
-        if rand::rand(2) == 1 {
+        if random::rand(2) == 1 {
             return;
         }
         let data = child.borrow().data.clone();
@@ -102,7 +102,7 @@ impl<T: Debug + PartialOrd> Node<T> {
 
         if let Some(ref mut down) = self.down {
             return match down.borrow_mut().insert(data) {
-                Some(child) => match rand::rand(2) {
+                Some(child) => match random::rand(2) {
                     1 => {
                         let data = child.borrow().data.clone();
                         let node = Self {
