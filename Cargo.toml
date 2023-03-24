@@ -19,4 +19,5 @@ members = [
     "greedy_salesman",
     "better_salesman",
     "hasher",
+    "bucket_list",
 ]
