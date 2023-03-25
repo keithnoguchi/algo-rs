@@ -16,7 +16,7 @@ const BGROW: usize = 4;
 #[derive(Debug)]
 pub struct HMap<K, V> {
     n_moved: usize,
-    pub(crate) main: BucketList<K, V>,
+    main: BucketList<K, V>,
     grow: BucketList<K, V>,
 }
 
