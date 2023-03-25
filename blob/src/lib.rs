@@ -15,3 +15,15 @@ pub enum Error {
     #[error("IO {}", 0)]
     Io(std::io::Error),
 }
+
+impl From<bincode::Error> for Error {
+    fn from(e: bincode::Error) -> Self {
+        Self::BinCode(e)
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Self::Io(e)
+    }
+}
