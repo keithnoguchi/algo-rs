@@ -27,6 +27,7 @@ https://github.com/keithnoguchi/algo-rs/actions)
 - [A greedy salesman](greedy_salesman/src/main.rs)
 - [A better salesman](better_salesman/src/main.rs)
 - [A hasher](hasher/src/lib.rs)
-- [An ID generator](id_generator/src/main.rs)
+- [An ID generator](ecs/src/lib.rs)
+- [An ECS (Entity Component Systems)](ecs/src/lib.rs)
 
 Happy Hacking!
