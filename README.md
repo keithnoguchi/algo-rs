@@ -28,6 +28,7 @@ https://github.com/keithnoguchi/algo-rs/actions)
 - [A better salesman](better_salesman/src/main.rs)
 - [A hasher](hasher/src/lib.rs)
 - [An ID generator](ecs/src/lib.rs)
-- [An ECS (Entity Component Systems)](ecs/src/system.rs)
+- [An ECS (Entity Component Systems) systems](ecs/src/system.rs)
+- [A terminal game powered by ECS](ecs/src/main.rs)
 
 Happy Hacking!

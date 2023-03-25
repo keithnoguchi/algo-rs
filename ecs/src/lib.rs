@@ -2,8 +2,8 @@
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
-mod data;
-mod system;
+pub mod data;
+pub mod system;
 
 pub trait EcsStore<T> {
     fn add(&mut self, g: GenData, t: T);

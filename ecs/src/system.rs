@@ -1,8 +1,8 @@
-use crate::{EcsStore, GenManager};
 use crate::data::*;
+use crate::{EcsStore, GenManager};
 
 use termion::raw::RawTerminal;
-use termion::{color, cursor}; 
+use termion::{color, cursor};
 
 pub fn move_sys<D: EcsStore<Dir>, P: EcsStore<Pos>>(dd: &D, pp: &mut P) {
     pp.for_each_mut(|g, p| {
@@ -46,9 +46,7 @@ pub fn dir_sys<D: EcsStore<Dir>, P: EcsStore<Pos>>(dd: &mut D, pp: &P) {
     });
 }
 
-pub fn collision_sys<P: EcsStore<Pos>, S: EcsStore<Strength>>(
-    pp: &P, ss: &mut S,
-) {
+pub fn collision_sys<P: EcsStore<Pos>, S: EcsStore<Strength>>(pp: &P, ss: &mut S) {
     // O(n^2)
     let mut collisions = Vec::new();
     pp.for_each(|og, op| {
@@ -106,13 +104,7 @@ pub fn render_sys<T: std::io::Write, P: EcsStore<Pos>, S: EcsStore<Strength>>(
             let x = (p.x % w) + 1; // term positions start at 1
             let y = (p.y % h) + 1;
 
-            write!(
-                t,
-                "{}{}{}",
-                cursor::Goto(x as u16, y as u16),
-                col,
-                st.s,
-            ).ok();
+            write!(t, "{}{}{}", cursor::Goto(x as u16, y as u16), col, st.s,).ok();
         }
     });
 }
@@ -127,12 +119,16 @@ pub fn death_sys<S: EcsStore<Strength>, P: EcsStore<Pos>, D: EcsStore<Dir>>(
     let (w, h) = termion::terminal_size().unwrap();
     let (w, h) = (w as i32, h as i32);
 
-    pp.for_each(|g, p| if p.x > w || p.x < 0 || p.y > h || p.y < 0 {
-        to_kill.push(g);
+    pp.for_each(|g, p| {
+        if p.x > w || p.x < 0 || p.y > h || p.y < 0 {
+            to_kill.push(g);
+        }
     });
 
-    ss.for_each(|g, s| if s.h <= 0 {
-        to_kill.push(g);
+    ss.for_each(|g, s| {
+        if s.h <= 0 {
+            to_kill.push(g);
+        }
     });
 
     for tk in to_kill {
@@ -142,4 +138,3 @@ pub fn death_sys<S: EcsStore<Strength>, P: EcsStore<Pos>, D: EcsStore<Dir>>(
         dd.drop(tk);
     }
 }
-
