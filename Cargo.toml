@@ -20,4 +20,5 @@ members = [
     "better_salesman",
     "hasher",
     "bucket_list",
+    "hash_map",
 ]

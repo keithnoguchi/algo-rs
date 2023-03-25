@@ -9,10 +9,10 @@ use std::hash::Hash;
 pub struct BucketList<K, V> {
     seed: u64,
     len: usize,
-    buckets: Vec<Vec<(K, V)>>,
+    pub buckets: Vec<Vec<(K, V)>>,
 }
 
-impl<K: Eq + Hash, V> Default for BucketList<K, V> {
+impl<K, V> Default for BucketList<K, V> {
     fn default() -> Self {
         Self {
             seed: rand::random(),
@@ -29,6 +29,14 @@ impl<K: Eq + Hash, V> BucketList<K, V> {
         self.buckets[h].push((k, v));
         self.len += 1;
         self.buckets[h].len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.len
     }
 
     pub fn get<Q>(&self, k: &Q) -> Option<&V>
