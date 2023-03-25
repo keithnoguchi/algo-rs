@@ -14,6 +14,7 @@ https://github.com/keithnoguchi/algo-rs/actions)
 - [A graph](graph/src/main.rs)
 - [A bucket list](bucket_list/src/lib.rs)
 - [A hash map](hash_map/src/lib.rs)
+- [A blob](blob/src/lib.rs)
 
 ## Algorithms
 
