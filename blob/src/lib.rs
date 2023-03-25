@@ -1,14 +1,10 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+//! A blob data structure.
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#![forbid(unsafe_code, missing_debug_implementations)]
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[derive(Debug)]
+pub enum Error {
+    NoRoom,
+    TooBig(u64),
+    NotFound,
 }
