@@ -21,4 +21,5 @@ members = [
     "hasher",
     "bucket_list",
     "hash_map",
+    "ecs",
 ]
