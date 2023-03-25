@@ -6,12 +6,12 @@
 pub enum Error {
     #[error("No Room")]
     NoRoom,
-    #[error("Too Big")]
+    #[error("Too Big {}", 0)]
     TooBig(u64),
     #[error("Not Found")]
     NotFound,
-    #[error("Bincode Error")]
+    #[error("Bincode {}", 0)]
     BinCode(bincode::Error),
-    #[error("IO Error")]
+    #[error("IO {}", 0)]
     Io(std::io::Error),
 }
