@@ -1,4 +1,7 @@
-# Rust Data Structures and Algorithms
+# Rust Algorithms and Data Structures
+
+[![CI](https://github.com/keithnoguchi/algo-rs/actions/workflows/ci.yml/badge.svg)](
+https://github.com/keithnoguchi/algo-rs/actions)
 
 ## Data structures
 
@@ -24,5 +27,6 @@
 - [A greedy salesman](greedy_salesman/src/main.rs)
 - [A better salesman](better_salesman/src/main.rs)
 - [A hasher](hasher/src/lib.rs)
+- [An ID generator](id_generator/src/main.rs)
 
 Happy Hacking!
