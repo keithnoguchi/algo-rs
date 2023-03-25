@@ -122,9 +122,15 @@ impl<T> EcsStore<T> for VecStore<T> {
     }
 }
 
+impl<T> Default for VecStore<T> {
+    fn default() -> Self {
+        Self { items: vec![] }
+    }
+}
+
 impl<T> VecStore<T> {
     pub fn new() -> Self {
-        Self { items: vec![] }
+        Self::default()
     }
 }
 
