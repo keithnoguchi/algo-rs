@@ -108,10 +108,7 @@ impl<T> EcsStore<T> for VecStore<T> {
     fn for_each<F: FnMut(GenData, &T)>(&self, mut f: F) {
         for (n, x) in self.items.iter().enumerate() {
             if let Some((g, d)) = x {
-                f(GenData {
-                    gen: *g,
-                    pos: n,
-                }, d);
+                f(GenData { gen: *g, pos: n }, d);
             }
         }
     }
@@ -119,10 +116,7 @@ impl<T> EcsStore<T> for VecStore<T> {
     fn for_each_mut<F: FnMut(GenData, &mut T)>(&mut self, mut f: F) {
         for (n, x) in self.items.iter_mut().enumerate() {
             if let Some((g, d)) = x {
-                f(GenData {
-                    gen: *g,
-                    pos: n,
-                }, d);
+                f(GenData { gen: *g, pos: n }, d);
             }
         }
     }
@@ -130,9 +124,7 @@ impl<T> EcsStore<T> for VecStore<T> {
 
 impl<T> VecStore<T> {
     pub fn new() -> Self {
-        Self {
-            items: vec![],
-        }
+        Self { items: vec![] }
     }
 }
 
