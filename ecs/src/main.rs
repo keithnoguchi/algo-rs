@@ -1,4 +1,6 @@
-//! A CLI game to demonstrate ECS system.
+//! A CLI game to demonstrate [ECS] system.
+//!
+//! [ecs]: https://specs.amethyst.rs/docs/tutorials/
 
 use std::io::{self, Write};
 use std::sync::mpsc;
