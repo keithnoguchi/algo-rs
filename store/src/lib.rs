@@ -70,4 +70,18 @@ impl Store {
             elems,
         })
     }
+
+    pub fn inc_elems(&mut self, n: i32) -> Result<()> {
+        if n > 0 {
+            self.elems += n as u64;
+        } else {
+            let n2 = (-n) as u64;
+            if self.elems > n2 {
+                self.elems -= n2;
+            }
+        }
+        self.file.seek(SeekFrom::Start(24))?;
+        Blob::write_u64(&mut self.file, self.elems)?;
+        Ok(())
+    }
 }
