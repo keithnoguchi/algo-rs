@@ -23,5 +23,6 @@ fn test_insert_only() {
     let mut bs2 = Store::open(file).unwrap();
     assert_eq!(bs2.block_size, blocksize);
 
-    bs2.insert_only("fish", "so long and thanks for all the fish").unwrap();
+    bs2.insert_only("fish", "so long and thanks for all the fish")
+        .unwrap();
 }
