@@ -136,6 +136,38 @@ impl Store {
         }
     }
 
+    pub fn remove<K: Serialize>(&mut self, k: &K) -> Result<()> {
+        let s_blob = Blob::from(k, &0)?;
+        let bucket = s_blob.k_hash(self.hseed) % self.nblocks;
+        let b_start = self.b_start(bucket);
+        let b_end = self.b_start(bucket + 1);
+        let f = &mut self.file;
+        let mut pos = f.seek(SeekFrom::Start(b_start))?;
+        loop {
+            if pos >= b_end {
+                return Ok(());
+            }
+            let b = Blob::read(f)?;
+            if b.key_match(&s_blob) {
+                let l = b.len() as u64;
+                if pos + l < b_end {
+                    if Blob::read_u64(f)? == 0 {
+                        let nlen = Blob::read_u64(f)?;
+                        f.seek(SeekFrom::Start(pos))?;
+                        Blob::write_u64(f, 0)?;
+                        Blob::write_u64(f, l + nlen + 16)?;
+                        return Ok(());
+                    }
+                }
+                f.seek(SeekFrom::Start(pos))?;
+                Blob::write_u64(f, 0)?;
+                Blob::write_u64(f, l - 16)?;
+                return Ok(());
+            }
+            pos = f.seek(SeekFrom::Start(pos + b.len() as u64))?;
+        }
+    }
+
     fn b_start(&self, b: u64) -> u64 {
         COUNT_SIZE + self.block_size * b
     }
