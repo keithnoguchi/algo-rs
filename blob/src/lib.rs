@@ -61,13 +61,13 @@ impl Blob {
         Ok(Self { k, v })
     }
 
-    fn read_u64<R: io::Read>(r: &mut R) -> Result<u64> {
+    pub fn read_u64<R: io::Read>(r: &mut R) -> Result<u64> {
         let mut buf = [0u8; 8];
         r.read_exact(&mut buf)?;
         Ok(bincode::deserialize(&buf)?)
     }
 
-    fn write_u64<W: io::Write>(w: &mut W, data: u64) -> Result<()> {
+    pub fn write_u64<W: io::Write>(w: &mut W, data: u64) -> Result<()> {
         let data = bincode::serialize(&data)?;
         Ok(w.write_all(&data)?)
     }
