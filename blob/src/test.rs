@@ -29,4 +29,7 @@ fn test_write_read_str() {
     let b2 = Blob::read(&mut fin).unwrap();
     let v2: String = b2.get_v().unwrap();
     assert_eq!(v2, v);
+
+    let p: Point<i32> = b2.get_v().unwrap();
+    assert_eq!(p, Point { x: 11, y: 0 });
 }
