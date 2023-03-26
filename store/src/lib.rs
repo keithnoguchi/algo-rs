@@ -72,7 +72,7 @@ impl Store {
     }
 
     pub fn new_or_open(fname: &str, block_size: u64, nblocks: u64) -> Result<Self> {
-        Self::open(fname).or_else(|_e| Self::new(fname, block_size, nblocks))
+        Self::new(fname, block_size, nblocks).or_else(|_e| Self::open(fname))
     }
 
     pub fn inc_elems(&mut self, n: i32) -> Result<()> {
