@@ -22,4 +22,5 @@ members = [
     "bucket_list",
     "hash_map",
     "ecs",
+    "blob",
 ]
