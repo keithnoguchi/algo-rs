@@ -25,4 +25,18 @@ fn test_insert_only() {
 
     bs2.insert_only("fish", "so long and thanks for all the fish")
         .unwrap();
+    bs2.insert_only(23, "a big number for small counters")
+        .unwrap();
+    bs2.insert_only("green", "is a colour i guess").unwrap();
+    bs2.insert_only("happy", "is friends with sleepy").unwrap();
+    drop(bs2);
+
+    let mut b3 = Store::open(file).unwrap();
+    assert_eq!(
+        b3.get::<&str, String>(&"green")
+            .unwrap()
+            .get_v::<String>()
+            .unwrap(),
+        "is a colour i guess".to_string(),
+    );
 }
