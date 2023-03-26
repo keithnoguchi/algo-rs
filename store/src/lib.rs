@@ -33,7 +33,7 @@ impl Store {
             .open(fname)?;
         let fp = &mut file;
         fp.set_len(COUNT_SIZE + block_size * nblocks)?;
-        fp.seek(SeekFrom::Start(0))?;
+        fp.rewind()?;
         Blob::write_u64(fp, hseed)?;
         Blob::write_u64(fp, block_size)?;
         Blob::write_u64(fp, nblocks)?;
@@ -57,7 +57,7 @@ impl Store {
     pub fn open(fname: &str) -> Result<Self> {
         let mut file = OpenOptions::new().write(true).read(true).open(fname)?;
         let fp = &mut file;
-        fp.seek(SeekFrom::Start(0))?;
+        fp.rewind()?;
         let hseed = Blob::read_u64(fp)?;
         let block_size = Blob::read_u64(fp)?;
         let nblocks = Blob::read_u64(fp)?;
