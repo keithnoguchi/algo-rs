@@ -3,6 +3,10 @@
 [![CI](https://github.com/keithnoguchi/algo-rs/actions/workflows/ci.yml/badge.svg)](
 https://github.com/keithnoguchi/algo-rs/actions)
 
+[hands-on data structures and algorithms in rust]: https://github.com/PacktPublishing/Hands-On-Data-Structures-and-Algorithms-in-Rust
+
+Examples in [Hands-On Data Structures and Algorithms in Rust], and more.
+
 ## Data structures
 
 - [A heap](heap/src/main.rs)
