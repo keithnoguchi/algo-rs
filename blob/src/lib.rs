@@ -7,7 +7,7 @@ use std::result;
 
 use serde::{Deserialize, Serialize};
 
-type Result<T> = result::Result<T, Error>;
+pub type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug)]
 pub struct Blob {
