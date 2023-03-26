@@ -23,6 +23,10 @@ impl Blob {
         })
     }
 
+    pub fn is_empty(&self) -> bool {
+        false
+    }
+
     pub fn len(&self) -> usize {
         16 + self.k.len() + self.v.len()
     }
