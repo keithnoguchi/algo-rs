@@ -39,4 +39,7 @@ fn test_insert_only() {
             .unwrap(),
         "is a colour i guess".to_string(),
     );
+    b3.remove(&"green").ok();
+    assert!(b3.get::<&str, String>(&"green").is_err());
+    assert!(b3.get::<&str, String>(&"fish").is_ok());
 }

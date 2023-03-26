@@ -90,30 +90,9 @@ impl Store {
         Ok(())
     }
 
-    fn insert_only<K: Serialize, V: Serialize>(&mut self, k: K, v: V) -> Result<()> {
-        let blob = Blob::from(&k, &v)?;
-        if blob.len() > self.block_size as usize {
-            return Err(blob::Error::TooBig(blob.len()));
-        }
-        let bucket = blob.k_hash(self.hseed) % self.nblocks;
-        let f = &mut self.file;
-        let mut pos = f.seek(SeekFrom::Start(COUNT_SIZE + self.block_size * bucket))?;
-
-        loop {
-            if pos > COUNT_SIZE + self.block_size * (bucket + 1) {
-                return Err(blob::Error::NoRoom);
-            }
-            let klen = Blob::read_u64(f)?;
-            let vlen = Blob::read_u64(f)?;
-            if klen == 0 && (blob.len() as u64) < vlen {
-                f.seek(SeekFrom::Start(pos))?;
-                blob.write(f)?;
-                Blob::write_u64(f, 0)?;
-                Blob::write_u64(f, (vlen - blob.len() as u64) - 16)?;
-                return Ok(());
-            }
-            pos = f.seek(SeekFrom::Start(pos + 16 + klen + vlen))?;
-        }
+    pub fn insert<K: Serialize, V: Serialize>(&mut self, k: K, v: V) -> Result<()> {
+        self.remove(&k).ok();
+        self.insert_only(k, v)
     }
 
     pub fn get<K: Serialize, V: Serialize>(&mut self, k: &K) -> Result<Blob> {
@@ -136,7 +115,34 @@ impl Store {
         }
     }
 
-    pub fn remove<K: Serialize>(&mut self, k: &K) -> Result<()> {
+    fn insert_only<K: Serialize, V: Serialize>(&mut self, k: K, v: V) -> Result<()> {
+        let blob = Blob::from(&k, &v)?;
+        if blob.len() > self.block_size as usize {
+            return Err(blob::Error::TooBig(blob.len()));
+        }
+        let bucket = blob.k_hash(self.hseed) % self.nblocks;
+        let f = &mut self.file;
+        let mut pos = f.seek(SeekFrom::Start(COUNT_SIZE + self.block_size * bucket))?;
+
+        loop {
+            if pos > COUNT_SIZE + self.block_size * (bucket + 1) {
+                return Err(blob::Error::NoRoom);
+            }
+            let klen = Blob::read_u64(f)?;
+            let vlen = Blob::read_u64(f)?;
+            if klen == 0 && (blob.len() as u64) < vlen {
+                f.seek(SeekFrom::Start(pos))?;
+                blob.write(f)?;
+                Blob::write_u64(f, 0)?;
+                Blob::write_u64(f, (vlen - blob.len() as u64) - 16)?;
+                self.inc_elems(1)?;
+                return Ok(());
+            }
+            pos = f.seek(SeekFrom::Start(pos + 16 + klen + vlen))?;
+        }
+    }
+
+    fn remove<K: Serialize>(&mut self, k: &K) -> Result<()> {
         let s_blob = Blob::from(k, &0)?;
         let bucket = s_blob.k_hash(self.hseed) % self.nblocks;
         let b_start = self.b_start(bucket);
@@ -150,14 +156,13 @@ impl Store {
             let b = Blob::read(f)?;
             if b.key_match(&s_blob) {
                 let l = b.len() as u64;
-                if pos + l < b_end {
-                    if Blob::read_u64(f)? == 0 {
-                        let nlen = Blob::read_u64(f)?;
-                        f.seek(SeekFrom::Start(pos))?;
-                        Blob::write_u64(f, 0)?;
-                        Blob::write_u64(f, l + nlen + 16)?;
-                        return Ok(());
-                    }
+                if pos + l < b_end && Blob::read_u64(f)? == 0 {
+                    let nlen = Blob::read_u64(f)?;
+                    f.seek(SeekFrom::Start(pos))?;
+                    Blob::write_u64(f, 0)?;
+                    Blob::write_u64(f, l + nlen + 16)?;
+                    self.inc_elems(-1)?;
+                    return Ok(());
                 }
                 f.seek(SeekFrom::Start(pos))?;
                 Blob::write_u64(f, 0)?;
