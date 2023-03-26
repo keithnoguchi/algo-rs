@@ -85,3 +85,6 @@ impl Store {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod test;
