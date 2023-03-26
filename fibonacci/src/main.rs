@@ -1,4 +1,4 @@
-//! A fibonacci sequence.
+//! A fibonacci function.
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 

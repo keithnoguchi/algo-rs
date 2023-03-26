@@ -18,8 +18,8 @@ https://github.com/keithnoguchi/algo-rs/actions)
 
 ## Algorithms
 
-- [A fibonacci sequence generator](fibonacci/src/main.rs)
-- [A factorial sequence generator](factorial/src/main.rs)
+- [A fibonacci function](fibonacci/src/main.rs)
+- [A factorial function](factorial/src/main.rs)
 - [A pseudo random number generator](random/src/lib.rs)
 - [A bubble sort](bubble_sort/src/main.rs)
 - [A merge sort](merge_sort/src/main.rs)
