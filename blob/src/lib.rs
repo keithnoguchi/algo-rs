@@ -78,7 +78,7 @@ pub enum Error {
     #[error("No Room")]
     NoRoom,
     #[error("Too Big {}", 0)]
-    TooBig(u64),
+    TooBig(usize),
     #[error("Not Found")]
     NotFound,
     #[error("Bincode {}", 0)]

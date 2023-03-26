@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 blob = { version = "0.1.0", path = "../blob" }
 rand = "0.8.5"
+serde = "1.0.158"

@@ -8,8 +8,9 @@
 use std::fs::{File, OpenOptions};
 use std::io::{Seek, SeekFrom};
 
-use blob::Blob;
-use blob::Result;
+use serde::{Deserialize, Serialize};
+
+use blob::{self, Blob, Result};
 
 const COUNT_SIZE: u64 = 32;
 
@@ -87,6 +88,31 @@ impl Store {
         self.file.seek(SeekFrom::Start(24))?;
         Blob::write_u64(&mut self.file, self.elems)?;
         Ok(())
+    }
+
+    fn insert_only<K: Serialize, V: Serialize>(&mut self, k: K, v: V) -> Result<()> {
+        let blob = Blob::from(&k, &v)?;
+        if blob.len() > self.block_size as usize {
+            return Err(blob::Error::TooBig(blob.len()));
+        }
+        let bucket = blob.k_hash(self.hseed) % self.nblocks;
+        let f = &mut self.file;
+        let mut pos = f.seek(SeekFrom::Start(COUNT_SIZE + self.block_size + bucket))?;
+
+        loop {
+            if pos > COUNT_SIZE + self.block_size * (bucket + 1) {
+                return Err(blob::Error::NoRoom);
+            }
+            let klen = Blob::read_u64(f)?;
+            let vlen = Blob::read_u64(f)?;
+            if klen == 0 && (blob.len() as u64) < vlen {
+                f.seek(SeekFrom::Start(pos))?;
+                blob.write(f)?;
+                Blob::write_u64(f, 0)?;
+                Blob::write_u64(f, (vlen - blob.len() as u64) - 16)?;
+                return Ok(());
+            }
+        }
     }
 }
 
