@@ -24,4 +24,5 @@ members = [
     "hash_map",
     "ecs",
     "blob",
+    "store",
 ]
