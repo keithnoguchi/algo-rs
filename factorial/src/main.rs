@@ -1,4 +1,4 @@
-//! A factorial sequence generator
+//! A factorial function
 
 #![forbid(unsafe_code, missing_debug_implementations)]
 
