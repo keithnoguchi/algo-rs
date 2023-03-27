@@ -3,6 +3,10 @@
 [![CI](https://github.com/keithnoguchi/algo-rs/actions/workflows/ci.yml/badge.svg)](
 https://github.com/keithnoguchi/algo-rs/actions)
 
+[hands-on data structures and algorithms in rust]: https://github.com/PacktPublishing/Hands-On-Data-Structures-and-Algorithms-in-Rust
+
+Examples in [Hands-On Data Structures and Algorithms in Rust], and more.
+
 ## Data structures
 
 - [A heap](heap/src/main.rs)
@@ -15,6 +19,7 @@ https://github.com/keithnoguchi/algo-rs/actions)
 - [A bucket list](bucket_list/src/lib.rs)
 - [A hash map](hash_map/src/lib.rs)
 - [A blob data structure](blob/src/lib.rs)
+- [A blob store](store/src/lib.rs)
 
 ## Algorithms
 
@@ -30,7 +35,7 @@ https://github.com/keithnoguchi/algo-rs/actions)
 - [A better salesman](better_salesman/src/main.rs)
 - [A hasher](hasher/src/lib.rs)
 - [An ID generator](ecs/src/lib.rs)
-- [An ECS (Entity Component Systems) systems](ecs/src/system.rs)
-- [A terminal game powered by ECS](ecs/src/main.rs)
+- [An ECS (Entity Component Systems) system](ecs/src/system.rs)
+- [A ECS terminal game](ecs/src/main.rs)
 
 Happy Hacking!

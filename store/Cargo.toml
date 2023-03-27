@@ -1,13 +1,11 @@
 [package]
-name = "blob"
+name = "store"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bincode = "1.3"
-hasher = { version = "0.1.0", path = "../hasher" }
-serde = "1.0"
-serde_derive = "1.0"
-thiserror = "1.0"
+blob = { version = "0.1.0", path = "../blob" }
+rand = "0.8.5"
+serde = "1.0.158"
